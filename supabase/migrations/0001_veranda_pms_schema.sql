@@ -138,6 +138,136 @@ BEGIN
   DELETE FROM users WHERE sandbox_id = p_sandbox_id;
 
   IF p_state_json IS NOT NULL THEN
+    IF jsonb_typeof(p_state_json->'users') = 'array' THEN
+      INSERT INTO users (
+        sandbox_id, id, name, email, password, role, is_active,
+        failed_login_attempts, locked_until, low_allotment_alerts,
+        theme_preference, created_at
+      )
+      SELECT
+        p_sandbox_id,
+        u->>'id',
+        u->>'name',
+        u->>'email',
+        u->>'password',
+        u->>'role',
+        COALESCE((u->>'isActive')::boolean, true),
+        COALESCE((u->>'failedLoginAttempts')::int, 0),
+        NULLIF(u->>'lockedUntil', '')::timestamptz,
+        COALESCE((u->>'lowAllotmentAlerts')::boolean, true),
+        COALESCE(NULLIF(p_state_json->>'theme', ''), 'dark'),
+        COALESCE(NULLIF(u->>'createdAt', '')::timestamptz, now())
+      FROM jsonb_array_elements(p_state_json->'users') AS u;
+    END IF;
+
+    IF jsonb_typeof(p_state_json->'roomsPackages') = 'array' THEN
+      INSERT INTO rooms_packages (
+        sandbox_id, id, code, name, category, rate,
+        available_units, status, description, version, updated_at
+      )
+      SELECT
+        p_sandbox_id,
+        r->>'id',
+        r->>'code',
+        r->>'name',
+        r->>'category',
+        (r->>'rate')::numeric(12, 2),
+        (r->>'availableUnits')::numeric(10, 2),
+        COALESCE(NULLIF(r->>'status', ''), 'active'),
+        COALESCE(r->>'description', ''),
+        COALESCE((r->>'version')::int, 1),
+        COALESCE(NULLIF(r->>'updatedAt', '')::timestamptz, now())
+      FROM jsonb_array_elements(p_state_json->'roomsPackages') AS r;
+    END IF;
+
+    IF jsonb_typeof(p_state_json->'allotmentAdjustments') = 'array' THEN
+      INSERT INTO allotment_adjustments (
+        sandbox_id, id, room_package_id, adjustment_type,
+        quantity, reason, performed_by, created_at
+      )
+      SELECT
+        p_sandbox_id,
+        a->>'id',
+        a->>'roomPackageId',
+        a->>'type',
+        (a->>'quantity')::numeric(10, 2),
+        a->>'reason',
+        a->>'performedBy',
+        COALESCE(NULLIF(a->>'createdAt', '')::timestamptz, now())
+      FROM jsonb_array_elements(p_state_json->'allotmentAdjustments') AS a;
+    END IF;
+
+    IF jsonb_typeof(p_state_json->'guests') = 'array' THEN
+      INSERT INTO guests (
+        sandbox_id, id, name, email, phone, address,
+        loyalty_tier, version, created_at
+      )
+      SELECT
+        p_sandbox_id,
+        g->>'id',
+        g->>'name',
+        g->>'email',
+        g->>'phone',
+        g->>'address',
+        COALESCE(NULLIF(g->>'loyaltyTier', ''), 'Standard'),
+        COALESCE((g->>'version')::int, 1),
+        COALESCE(NULLIF(g->>'createdAt', '')::timestamptz, now())
+      FROM jsonb_array_elements(p_state_json->'guests') AS g;
+    END IF;
+
+    IF jsonb_typeof(p_state_json->'reservations') = 'array' THEN
+      INSERT INTO reservations (
+        sandbox_id, id, reservation_number, guest_id, status,
+        discount_percent, subtotal, discount_amount, tax_amount,
+        service_fee, grand_total, notes, placed_at, created_at
+      )
+      SELECT
+        p_sandbox_id,
+        res->>'id',
+        res->>'reservationNumber',
+        NULLIF(res->>'guestId', ''),
+        res->>'status',
+        COALESCE((res->>'discountPercent')::numeric(6, 2), 0),
+        (res->>'subtotal')::numeric(12, 2),
+        (res->>'discountAmount')::numeric(12, 2),
+        (res->>'taxAmount')::numeric(12, 2),
+        COALESCE((res->>'serviceFee')::numeric(12, 2), 250.00),
+        (res->>'grandTotal')::numeric(12, 2),
+        COALESCE(res->>'notes', ''),
+        COALESCE(NULLIF(res->>'placedAt', '')::timestamptz, now()),
+        COALESCE(NULLIF(res->>'createdAt', '')::timestamptz, now())
+      FROM jsonb_array_elements(p_state_json->'reservations') AS res;
+
+      INSERT INTO reservation_items (
+        sandbox_id, id, reservation_id, room_package_id,
+        quantity, unit_rate_snapshot
+      )
+      SELECT
+        p_sandbox_id,
+        item->>'id',
+        res->>'id',
+        item->>'roomPackageId',
+        (item->>'quantity')::numeric(10, 2),
+        (item->>'unitRateSnapshot')::numeric(12, 2)
+      FROM jsonb_array_elements(p_state_json->'reservations') AS res
+      CROSS JOIN LATERAL jsonb_array_elements(COALESCE(res->'items', '[]'::jsonb)) AS item;
+    END IF;
+
+    IF jsonb_typeof(p_state_json->'resetTokens') = 'array' THEN
+      INSERT INTO password_reset_tokens (
+        sandbox_id, token, user_id, email, expires_at, used_at, created_at
+      )
+      SELECT
+        p_sandbox_id,
+        tok->>'token',
+        tok->>'userId',
+        tok->>'email',
+        (tok->>'expiresAt')::timestamptz,
+        NULLIF(tok->>'usedAt', '')::timestamptz,
+        now()
+      FROM jsonb_array_elements(p_state_json->'resetTokens') AS tok;
+    END IF;
+
     INSERT INTO sandbox_snapshots (sandbox_id, state_json, updated_at)
     VALUES (p_sandbox_id, p_state_json, now())
     ON CONFLICT (sandbox_id) DO UPDATE

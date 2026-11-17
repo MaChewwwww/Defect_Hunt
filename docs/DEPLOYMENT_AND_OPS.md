@@ -62,8 +62,26 @@ SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 - Contestants can click **Reset demo data** in the footer of the `/login` page at any time if they corrupt their own sandbox data (e.g., after testing `VH-12` Admin self-deactivation, `VH-46` deleting Daniel Cruz, or `VH-29` mutating room rates).
 - Because each browser has a unique `sandbox_id`, a contestant resetting their data or deleting records has zero impact on any other contestant in the laboratory or auditorium.
 
+### CLI Seeder & Full Database Reset
+
+Use [scripts/db-seed.mjs](../scripts/db-seed.mjs) (via `.env.local` `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`) to seed or reset Supabase directly from the terminal:
+
+```bash
+# Re-seed the canonical baseline sandbox (00000000-0000-4000-8000-000000000001)
+pnpm db:seed
+
+# Wipe all sandboxes and re-seed a clean baseline sandbox
+pnpm db:reset
+
+# Optional: prune only stale sandboxes older than 7 days and re-seed baseline
+pnpm db:reset -- --prune-days 7
+
+# Optional: inspect actions without mutating Supabase
+pnpm db:reset -- --dry-run
+```
+
 ### Post-Round Sandbox Cleanup
-- After the competition concludes, old sandbox slices in Supabase can be pruned via:
+- After the competition concludes, prune old sandbox slices via `pnpm db:reset -- --prune-days 7` or in SQL:
   ```sql
   DELETE FROM sandboxes WHERE last_reset_at < now() - interval '7 days';
   ```
