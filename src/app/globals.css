@@ -1,0 +1,127 @@
+@import "tailwindcss";
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+@import "@fontsource-variable/jetbrains-mono";
+
+:root,
+html[data-theme="dark"] {
+  --bg-canvas: #0b1211;
+  --bg-rail: #0e1715;
+  --bg-surface: #131e1c;
+  --bg-subtle: #192724;
+  --bg-elevated: rgba(19, 30, 28, 0.88);
+  --ink-primary: #f3efea;
+  --ink-secondary: #b8b2a8;
+  --ink-muted: #7e8884;
+  --accent-primary: #c87d4b;
+  --accent-primary-hover: #d88f5e;
+  --accent-primary-fg: #ffffff;
+  --accent-secondary: #2e9b8b;
+  --border-subtle: #223330;
+  --border-strong: #354d48;
+  --status-success-bg: rgba(52, 211, 153, 0.14);
+  --status-success-fg: #34d399;
+  --status-info-bg: rgba(56, 189, 248, 0.14);
+  --status-info-fg: #38bdf8;
+  --status-warn-bg: rgba(251, 191, 36, 0.14);
+  --status-warn-fg: #fbbf24;
+  --status-danger-bg: rgba(248, 113, 113, 0.14);
+  --status-danger-fg: #f87171;
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  --bg-canvas: #faf7f2;
+  --bg-rail: #f2ede4;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f5f1ea;
+  --bg-elevated: rgba(250, 247, 242, 0.9);
+  --ink-primary: #141d1b;
+  --ink-secondary: #36423f;
+  --ink-muted: #5c6865;
+  --accent-primary: #a8582b;
+  --accent-primary-hover: #8f4720;
+  --accent-primary-fg: #ffffff;
+  --accent-secondary: #176b5e;
+  --border-subtle: #e4ddd3;
+  --border-strong: #8c857b;
+  --status-success-bg: rgba(23, 107, 94, 0.12);
+  --status-success-fg: #115e52;
+  --status-info-bg: rgba(14, 100, 144, 0.12);
+  --status-info-fg: #0e6490;
+  --status-warn-bg: rgba(146, 64, 14, 0.12);
+  --status-warn-fg: #92400e;
+  --status-danger-bg: rgba(185, 28, 28, 0.12);
+  --status-danger-fg: #b91c1c;
+  color-scheme: light;
+}
+
+@theme inline {
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Instrument Serif", Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
+}
+
+* {
+  border-color: var(--border-subtle);
+}
+
+html,
+body {
+  background-color: var(--bg-canvas);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* @defect VH-59 (Medium | Accessibility | Accessibility)
+   Expected: Visible keyboard focus outline on interactive buttons and links when tabbing.
+   Actual: Focus outlines are suppressed across buttons and links. */
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111413 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #111413 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
