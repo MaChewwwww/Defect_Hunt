@@ -117,7 +117,7 @@ def generate_veranda_docx(
     set_cell_text(sys_tbl.rows[1].cells[0], "Live URL")
     set_cell_text(
         sys_tbl.rows[1].cells[1],
-        "https://veranda-pms.vercel.app (update with deployed Vercel URL)",
+        "https://veranda-pms.vercel.app",
     )
     set_cell_text(sys_tbl.rows[2].cells[0], "Total defects")
     set_cell_text(sys_tbl.rows[2].cells[1], "60  (Easy 5, Medium 31, Hard 24)")

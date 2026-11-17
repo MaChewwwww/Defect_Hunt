@@ -118,6 +118,7 @@ CREATE OR REPLACE FUNCTION reset_veranda_sandbox(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_catalog, pg_temp
 AS $$
 DECLARE
   v_local_date DATE := (now() AT TIME ZONE 'Asia/Manila')::date;
@@ -147,3 +148,18 @@ BEGIN
   RETURN COALESCE(p_state_json, '{}'::jsonb);
 END;
 $$;
+
+-- Multi-tenant isolation: deny direct anon/authenticated PostgREST access.
+-- All authorized sandbox reads/writes run through Next.js server handlers using service_role.
+ALTER TABLE sandboxes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rooms_packages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE allotment_adjustments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE guests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reservation_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE password_reset_tokens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sandbox_snapshots ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON FUNCTION reset_veranda_sandbox(UUID, JSONB) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION reset_veranda_sandbox(UUID, JSONB) TO service_role;

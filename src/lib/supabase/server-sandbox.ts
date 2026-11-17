@@ -18,11 +18,13 @@ export async function handleSandboxAction(
     const freshSeed = createInitialSandboxDb(sandboxId, new Date());
     if (supabase && isSupabaseConfigured()) {
       try {
-        await supabase.rpc("reset_veranda_sandbox", {
+        const { error } = await supabase.rpc("reset_veranda_sandbox", {
           p_sandbox_id: sandboxId,
           p_state_json: freshSeed,
         });
-        return { ok: true, sandboxId, mode: "supabase", state: freshSeed };
+        if (!error) {
+          return { ok: true, sandboxId, mode: "supabase", state: freshSeed };
+        }
       } catch {
         // Fallback smoothly to local mirror if Supabase RPC isn't provisioned yet
       }
@@ -33,16 +35,22 @@ export async function handleSandboxAction(
   if (action === "sync" && state) {
     if (supabase && isSupabaseConfigured()) {
       try {
-        await supabase.from("sandboxes").upsert({
+        const { error: sandboxError } = await supabase.from("sandboxes").upsert({
           id: sandboxId,
           last_reset_at: new Date().toISOString(),
         });
-        await supabase.from("sandbox_snapshots").upsert({
-          sandbox_id: sandboxId,
-          state_json: state,
-          updated_at: new Date().toISOString(),
-        });
-        return { ok: true, sandboxId, mode: "supabase", state };
+        if (!sandboxError) {
+          const { error: snapshotError } = await supabase
+            .from("sandbox_snapshots")
+            .upsert({
+              sandbox_id: sandboxId,
+              state_json: state,
+              updated_at: new Date().toISOString(),
+            });
+          if (!snapshotError) {
+            return { ok: true, sandboxId, mode: "supabase", state };
+          }
+        }
       } catch {
         // Graceful fallback
       }
@@ -53,13 +61,13 @@ export async function handleSandboxAction(
   // init
   if (supabase && isSupabaseConfigured()) {
     try {
-      const { data } = await supabase
+      const { data, error: selectError } = await supabase
         .from("sandbox_snapshots")
         .select("state_json")
         .eq("sandbox_id", sandboxId)
         .maybeSingle();
 
-      if (data?.state_json) {
+      if (!selectError && data?.state_json) {
         return {
           ok: true,
           sandboxId,
@@ -68,12 +76,16 @@ export async function handleSandboxAction(
         };
       }
 
-      const freshSeed = createInitialSandboxDb(sandboxId, new Date());
-      await supabase.rpc("reset_veranda_sandbox", {
-        p_sandbox_id: sandboxId,
-        p_state_json: freshSeed,
-      });
-      return { ok: true, sandboxId, mode: "supabase", state: freshSeed };
+      if (!selectError) {
+        const freshSeed = createInitialSandboxDb(sandboxId, new Date());
+        const { error: rpcError } = await supabase.rpc("reset_veranda_sandbox", {
+          p_sandbox_id: sandboxId,
+          p_state_json: freshSeed,
+        });
+        if (!rpcError) {
+          return { ok: true, sandboxId, mode: "supabase", state: freshSeed };
+        }
+      }
     } catch {
       // Graceful fallback
     }

@@ -57,10 +57,12 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    command: "corepack pnpm build && corepack pnpm start --port 3010",
-    url: "http://localhost:3010/api/health",
-    reuseExistingServer: false,
-    timeout: 180000,
-  },
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : {
+        command: "corepack pnpm build && corepack pnpm start --port 3010",
+        url: "http://localhost:3010/api/health",
+        reuseExistingServer: false,
+        timeout: 180000,
+      },
 });

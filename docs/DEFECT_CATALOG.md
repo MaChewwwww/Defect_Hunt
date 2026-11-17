@@ -10,7 +10,7 @@
 | Field | Value |
 |---|---|
 | **System** | **Veranda PMS** — Hospitality, Room Allotment, and Guest Folio Management System (fictional resort operator **Solstice Bay Resort & Villas**, fictional data only) |
-| **Deployment Target** | Vercel + Supabase (`https://veranda-pms.vercel.app` or configured competition URL) |
+| **Deployment Target** | Vercel + Supabase (`https://veranda-pms.vercel.app`, Supabase `kvjywnrknfhuibtrnvpo` in `ap-southeast-1`) |
 | **Total Defects** | **60** (`Easy: 5`, `Medium: 31`, `Hard: 24`) |
 
 ---
