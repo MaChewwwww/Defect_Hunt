@@ -9,7 +9,6 @@ import ts from "typescript";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(SCRIPT_DIR, "..");
-const DEFAULT_BASELINE_SANDBOX_ID = "00000000-0000-4000-8000-000000000001";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -94,14 +93,14 @@ function printHelp() {
   console.log(`Veranda PMS Supabase Seeder & Reset CLI
 
 Usage:
-  pnpm db:seed [options]     Seed or re-seed a sandbox in Supabase
-  pnpm db:reset [options]    Wipe sandboxes in Supabase and re-seed baseline
+  pnpm db:seed [options]     Seed or re-seed all 5 competition group sandboxes (or --sandbox)
+  pnpm db:reset [options]    Wipe sandboxes in Supabase and re-seed all 5 competition groups
 
 Options:
-  --sandbox, -s <uuid>       Target sandbox UUID (default: ${DEFAULT_BASELINE_SANDBOX_ID})
+  --sandbox, -s <uuid>       Target a single sandbox UUID (default: all 5 group sandboxes)
   --date <iso>               Anchor ISO timestamp for relative dates (default: now)
   --prune-days <n>           On reset, delete only sandboxes older than <n> days
-  --no-seed                  On reset, wipe/prune without seeding baseline afterwards
+  --no-seed                  On reset, wipe/prune without seeding sandboxes afterwards
   --dry-run                  Print resolved actions without modifying Supabase
   --help, -h                 Show this help message
 `);
@@ -111,7 +110,7 @@ function parseCliArgs(rawArgs) {
   const args = rawArgs.filter((token) => token !== "--");
   let mode = "seed";
   let modeExplicit = false;
-  let sandboxId = DEFAULT_BASELINE_SANDBOX_ID;
+  let sandboxId = null;
   let anchorDate = new Date();
   let pruneDays = null;
   let noSeed = false;
@@ -191,10 +190,24 @@ async function main() {
     );
   }
 
-  const { createInitialSandboxDb } = loadTsModule(
-    path.join(ROOT_DIR, "src", "lib", "domain", "seed.ts")
-  );
-  const seedDb = createInitialSandboxDb(opts.sandboxId, opts.anchorDate);
+  const {
+    createInitialSandboxDb,
+    COMPETITION_GROUPS,
+    resolveGroupBySandboxId,
+  } = loadTsModule(path.join(ROOT_DIR, "src", "lib", "domain", "seed.ts"));
+
+  const targetSandboxes = opts.sandboxId
+    ? [
+        {
+          sandboxId: opts.sandboxId,
+          label:
+            resolveGroupBySandboxId(opts.sandboxId)?.name ?? "Custom Sandbox",
+        },
+      ]
+    : COMPETITION_GROUPS.map((group) => ({
+        sandboxId: group.sandboxId,
+        label: group.name,
+      }));
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -215,16 +228,22 @@ async function main() {
       );
     }
     if (!opts.noSeed) {
-      const itemCount = seedDb.reservations.reduce(
-        (sum, r) => sum + r.items.length,
-        0
-      );
-      console.log(
-        `Would seed sandbox ${opts.sandboxId} (anchor=${opts.anchorDate.toISOString()}): ` +
-          `${seedDb.users.length} users, ${seedDb.roomsPackages.length} rooms/packages, ` +
-          `${seedDb.allotmentAdjustments.length} adjustments, ${seedDb.guests.length} guests, ` +
-          `${seedDb.reservations.length} reservations, ${itemCount} reservation items.`
-      );
+      for (const target of targetSandboxes) {
+        const previewDb = createInitialSandboxDb(
+          target.sandboxId,
+          opts.anchorDate
+        );
+        const itemCount = previewDb.reservations.reduce(
+          (sum, r) => sum + r.items.length,
+          0
+        );
+        console.log(
+          `Would seed ${target.label} (${target.sandboxId}, anchor=${opts.anchorDate.toISOString()}): ` +
+            `${previewDb.users.length} users, ${previewDb.roomsPackages.length} rooms/packages, ` +
+            `${previewDb.allotmentAdjustments.length} adjustments, ${previewDb.guests.length} guests, ` +
+            `${previewDb.reservations.length} reservations, ${itemCount} reservation items.`
+        );
+      }
     }
     return;
   }
@@ -257,45 +276,52 @@ async function main() {
   }
 
   if (!opts.noSeed) {
-    const { error } = await supabase.rpc("reset_veranda_sandbox", {
-      p_sandbox_id: opts.sandboxId,
-      p_state_json: seedDb,
-    });
-    if (error) {
-      throw new Error(`reset_veranda_sandbox RPC failed: ${error.message}`);
-    }
+    for (const target of targetSandboxes) {
+      const seedDb = createInitialSandboxDb(target.sandboxId, opts.anchorDate);
+      const { error } = await supabase.rpc("reset_veranda_sandbox", {
+        p_sandbox_id: target.sandboxId,
+        p_state_json: seedDb,
+      });
+      if (error) {
+        throw new Error(
+          `reset_veranda_sandbox RPC failed for ${target.sandboxId}: ${error.message}`
+        );
+      }
 
-    const summary = {
-      users: await countTableRows(supabase, "users", opts.sandboxId),
-      rooms_packages: await countTableRows(
-        supabase,
-        "rooms_packages",
-        opts.sandboxId
-      ),
-      allotment_adjustments: await countTableRows(
-        supabase,
-        "allotment_adjustments",
-        opts.sandboxId
-      ),
-      guests: await countTableRows(supabase, "guests", opts.sandboxId),
-      reservations: await countTableRows(
-        supabase,
-        "reservations",
-        opts.sandboxId
-      ),
-      reservation_items: await countTableRows(
-        supabase,
-        "reservation_items",
-        opts.sandboxId
-      ),
-      sandbox_snapshots: await countTableRows(
-        supabase,
-        "sandbox_snapshots",
-        opts.sandboxId
-      ),
-    };
-    console.log(`Seeded sandbox ${opts.sandboxId} (anchor=${opts.anchorDate.toISOString()}):`);
-    console.log(JSON.stringify(summary, null, 2));
+      const summary = {
+        users: await countTableRows(supabase, "users", target.sandboxId),
+        rooms_packages: await countTableRows(
+          supabase,
+          "rooms_packages",
+          target.sandboxId
+        ),
+        allotment_adjustments: await countTableRows(
+          supabase,
+          "allotment_adjustments",
+          target.sandboxId
+        ),
+        guests: await countTableRows(supabase, "guests", target.sandboxId),
+        reservations: await countTableRows(
+          supabase,
+          "reservations",
+          target.sandboxId
+        ),
+        reservation_items: await countTableRows(
+          supabase,
+          "reservation_items",
+          target.sandboxId
+        ),
+        sandbox_snapshots: await countTableRows(
+          supabase,
+          "sandbox_snapshots",
+          target.sandboxId
+        ),
+      };
+      console.log(
+        `Seeded ${target.label} (${target.sandboxId}, anchor=${opts.anchorDate.toISOString()}):`
+      );
+      console.log(JSON.stringify(summary, null, 2));
+    }
   }
 
   const totalSandboxes = await countTableRows(supabase, "sandboxes", null);

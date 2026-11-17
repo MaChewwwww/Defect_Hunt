@@ -39,6 +39,7 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const {
     isReady,
+    db,
     session,
     logout,
     theme,
@@ -357,8 +358,18 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
         </main>
 
         {/* Footer */}
-        <footer className="no-print border-t border-[var(--border-subtle)] px-6 py-3 flex items-center justify-between text-xs text-[var(--ink-muted)]">
-          <span>Veranda PMS &middot; Solstice Bay Resort &amp; Villas</span>
+        <footer className="no-print border-t border-[var(--border-subtle)] px-6 py-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--ink-muted)]">
+          <div className="flex flex-wrap items-center gap-2">
+            <span>Veranda PMS &middot; Solstice Bay Resort &amp; Villas</span>
+            {db?.ownerGroupName && (
+              <span
+                data-testid="workspace-owner-group"
+                className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-2 py-0.5 text-[11px] font-medium text-[var(--ink-secondary)]"
+              >
+                Owner: {db.ownerGroupName}
+              </span>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => void handleReset()}

@@ -6,7 +6,11 @@ import {
   LOW_ALLOTMENT_THRESHOLD,
   resolveEffectiveReservation,
 } from "@/lib/domain/calculations";
-import { createInitialSandboxDb } from "@/lib/domain/seed";
+import {
+  COMPETITION_GROUPS,
+  createInitialSandboxDb,
+  resolveGroupByEmail,
+} from "@/lib/domain/seed";
 import { buildReportsCsvContent } from "@/app/reports/page";
 
 describe("Veranda PMS Seed & Planted Domain Defects", () => {
@@ -14,7 +18,7 @@ describe("Veranda PMS Seed & Planted Domain Defects", () => {
   const db = createInitialSandboxDb("test-sandbox-01", anchorNow);
 
   it("seeds exact counts, plaintext passwords (VH-14), and category/allotment boundaries (VH-17, VH-25)", () => {
-    expect(db.users).toHaveLength(3);
+    expect(db.users).toHaveLength(8);
     expect(db.users[0].password).toBe("Admin@123"); // VH-14 plaintext check
 
     expect(db.roomsPackages).toHaveLength(20);
@@ -85,5 +89,28 @@ describe("Veranda PMS Seed & Planted Domain Defects", () => {
     // Cabana Suite, Poolside is unquoted per VH-49
     expect(csv).toContain("Cabana Suite, Poolside");
     expect(csv).not.toContain('"Cabana Suite, Poolside');
+  });
+
+  it("assigns 5 seeded competition group accounts to distinct isolated sandbox IDs", () => {
+    expect(COMPETITION_GROUPS).toHaveLength(5);
+    const seenSandboxes = new Set<string>();
+
+    for (let i = 0; i < COMPETITION_GROUPS.length; i += 1) {
+      const group = COMPETITION_GROUPS[i];
+      const expectedEmail = `group${i + 1}@verandapms.test`;
+      expect(group.email).toBe(expectedEmail);
+      expect(resolveGroupByEmail(expectedEmail)?.sandboxId).toBe(group.sandboxId);
+      // Un-trimmed emails must not resolve a group (preserves VH-01)
+      expect(resolveGroupByEmail(` ${expectedEmail} `)).toBeUndefined();
+
+      seenSandboxes.add(group.sandboxId);
+      const groupDb = createInitialSandboxDb(group.sandboxId, anchorNow);
+      expect(groupDb.ownerGroupId).toBe(group.id);
+      expect(groupDb.ownerGroupName).toBe(group.name);
+      expect(groupDb.roomsPackages).toHaveLength(20);
+      expect(groupDb.reservations).toHaveLength(20);
+    }
+
+    expect(seenSandboxes.size).toBe(5);
   });
 });

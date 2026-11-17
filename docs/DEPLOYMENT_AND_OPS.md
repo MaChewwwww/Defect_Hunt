@@ -55,25 +55,29 @@ SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 
 ### Before the Event Round Starts
 1. Run `pnpm test:e2e` against the deployed preview/production URL to verify all 60 planted defects (`VH-01`..`VH-60`) reproduce cleanly.
-2. Distribute only the **Live URL** and **Demo Account Credentials** (`admin@verandapms.test`, `staff@verandapms.test`, `former@verandapms.test`) to contestants.
-3. **Never share** `docs/DEFECT_CATALOG.md` or the generated `Veranda_PMS_Defect_List.docx` with contestants; provide it exclusively to official event judges and validators.
+2. Run `pnpm db:reset` before each competition wave to ensure all 5 group sandboxes (`00000000-0000-4000-8000-000000000001`..`00000000-0000-4000-8000-000000000005`) are cleanly seeded.
+3. Distribute only the **Live URL**, **Competition Group Accounts** (`group1@verandapms.test` / `Group1@123` through `group5@verandapms.test` / `Group5@123`, each owning isolated resort data), and **Role Test Accounts** (`admin@verandapms.test`, `staff@verandapms.test`, `former@verandapms.test`) to contestants.
+4. **Never share** `docs/DEFECT_CATALOG.md` or the generated `Veranda_PMS_Defect_List.docx` with contestants; provide it exclusively to official event judges and validators.
 
 ### During the Competition
 - Contestants can click **Reset demo data** in the footer of the `/login` page at any time if they corrupt their own sandbox data (e.g., after testing `VH-12` Admin self-deactivation, `VH-46` deleting Daniel Cruz, or `VH-29` mutating room rates).
-- Because each browser has a unique `sandbox_id`, a contestant resetting their data or deleting records has zero impact on any other contestant in the laboratory or auditorium.
+- Because each competition group account and browser session maps to an isolated `sandbox_id`, a group resetting their data or deleting records has zero impact on any other group in the laboratory or auditorium.
 
 ### CLI Seeder & Full Database Reset
 
 Use [scripts/db-seed.mjs](../scripts/db-seed.mjs) (via `.env.local` `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`) to seed or reset Supabase directly from the terminal:
 
 ```bash
-# Re-seed the canonical baseline sandbox (00000000-0000-4000-8000-000000000001)
+# Re-seed all 5 competition group sandboxes (00000000-0000-4000-8000-000000000001..000000000005)
 pnpm db:seed
 
-# Wipe all sandboxes and re-seed a clean baseline sandbox
+# Wipe all sandboxes and re-seed all 5 competition groups cleanly
 pnpm db:reset
 
-# Optional: prune only stale sandboxes older than 7 days and re-seed baseline
+# Seed a single specific sandbox UUID
+pnpm db:seed -- --sandbox 00000000-0000-4000-8000-000000000001
+
+# Optional: prune only stale sandboxes older than 7 days and re-seed all 5 groups
 pnpm db:reset -- --prune-days 7
 
 # Optional: inspect actions without mutating Supabase

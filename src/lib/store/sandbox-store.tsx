@@ -13,7 +13,10 @@ import {
   calculateDefectiveFolioTotals,
   LOW_ALLOTMENT_THRESHOLD,
 } from "@/lib/domain/calculations";
-import { createInitialSandboxDb } from "@/lib/domain/seed";
+import {
+  createInitialSandboxDb,
+  resolveGroupByEmail,
+} from "@/lib/domain/seed";
 import type {
   AllotmentAdjustment,
   Guest,
@@ -32,6 +35,10 @@ import type {
 const STORAGE_SANDBOX_ID_KEY = "veranda.v1.sandbox_id";
 const STORAGE_DB_KEY = "veranda.v1.db";
 const STORAGE_SESSION_KEY = "veranda.v1.session";
+
+function getScopedDbStorageKey(sandboxId: string): string {
+  return `${STORAGE_DB_KEY}.${sandboxId}`;
+}
 
 export interface ActionResult<T = undefined> {
   ok: boolean;
@@ -177,7 +184,13 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
   const persistDb = useCallback((nextDb: SandboxDatabase) => {
     setDb(nextDb);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_DB_KEY, JSON.stringify(nextDb));
+      const serialized = JSON.stringify(nextDb);
+      window.localStorage.setItem(STORAGE_SANDBOX_ID_KEY, nextDb.sandboxId);
+      window.localStorage.setItem(STORAGE_DB_KEY, serialized);
+      window.localStorage.setItem(
+        getScopedDbStorageKey(nextDb.sandboxId),
+        serialized
+      );
       // Best-effort async cloud sync to Supabase
       void fetch("/api/sandbox/sync", {
         method: "POST",
@@ -201,7 +214,9 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
     }
 
     let loadedDb: SandboxDatabase | null = null;
-    const rawDb = window.localStorage.getItem(STORAGE_DB_KEY);
+    const rawDb =
+      window.localStorage.getItem(STORAGE_DB_KEY) ||
+      window.localStorage.getItem(getScopedDbStorageKey(sandboxId));
     if (rawDb) {
       try {
         loadedDb = JSON.parse(rawDb) as SandboxDatabase;
@@ -212,7 +227,9 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
 
     if (!loadedDb) {
       loadedDb = createInitialSandboxDb(sandboxId, new Date());
-      window.localStorage.setItem(STORAGE_DB_KEY, JSON.stringify(loadedDb));
+      const serialized = JSON.stringify(loadedDb);
+      window.localStorage.setItem(STORAGE_DB_KEY, serialized);
+      window.localStorage.setItem(getScopedDbStorageKey(sandboxId), serialized);
       void fetch("/api/sandbox/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -279,7 +296,9 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
     setTheme("dark");
 
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_DB_KEY, JSON.stringify(freshDb));
+      const serialized = JSON.stringify(freshDb);
+      window.localStorage.setItem(STORAGE_DB_KEY, serialized);
+      window.localStorage.setItem(getScopedDbStorageKey(sandboxId), serialized);
       window.localStorage.removeItem(STORAGE_SESSION_KEY);
       window.sessionStorage.removeItem(STORAGE_SESSION_KEY);
     }
@@ -302,7 +321,58 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
       password: string,
       rememberMe: boolean
     ): ActionResult<SessionState> => {
-      const latestDb = readLatestDbFromStorage(db);
+      let latestDb = readLatestDbFromStorage(db);
+
+      // Switch data ownership slice when signing into a competition group account
+      // without trimming rawEmail so VH-01 whitespace rejection continues to hold.
+      const matchedGroup = resolveGroupByEmail(rawEmail);
+      if (
+        matchedGroup &&
+        latestDb.sandboxId !== matchedGroup.sandboxId &&
+        typeof window !== "undefined"
+      ) {
+        window.localStorage.setItem(
+          getScopedDbStorageKey(latestDb.sandboxId),
+          JSON.stringify(latestDb)
+        );
+
+        let groupDb: SandboxDatabase | null = null;
+        const rawGroupDb = window.localStorage.getItem(
+          getScopedDbStorageKey(matchedGroup.sandboxId)
+        );
+        if (rawGroupDb) {
+          try {
+            groupDb = JSON.parse(rawGroupDb) as SandboxDatabase;
+          } catch {
+            groupDb = null;
+          }
+        }
+
+        if (!groupDb) {
+          groupDb = createInitialSandboxDb(matchedGroup.sandboxId, new Date());
+          void fetch("/api/sandbox/init", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sandboxId: matchedGroup.sandboxId,
+              state: groupDb,
+            }),
+          }).catch(() => {});
+        }
+
+        const serializedGroup = JSON.stringify(groupDb);
+        window.localStorage.setItem(
+          STORAGE_SANDBOX_ID_KEY,
+          matchedGroup.sandboxId
+        );
+        window.localStorage.setItem(STORAGE_DB_KEY, serializedGroup);
+        window.localStorage.setItem(
+          getScopedDbStorageKey(matchedGroup.sandboxId),
+          serializedGroup
+        );
+        setDb(groupDb);
+        latestDb = groupDb;
+      }
 
       // @defect VH-01 (Medium | Auth / Login | Functional)
       // Expected: Leading and trailing spaces in email are trimmed before lookup.

@@ -22,6 +22,11 @@
 | **Admin** | `admin@verandapms.test` | `Admin@123` | Elena Marasigan (General Manager) |
 | **Staff** | `staff@verandapms.test` | `Staff@123` | Marco Villanueva (Front Desk Concierge) |
 | **Staff (deactivated)** | `former@verandapms.test` | `Former@123` | Tricia Soriano, inactive (`is_active = false`) |
+| **Group 1 — Coral Villa** | `group1@verandapms.test` | `Group1@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000001`) |
+| **Group 2 — Cypress Cove** | `group2@verandapms.test` | `Group2@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000002`) |
+| **Group 3 — Lagoon Sanctuary** | `group3@verandapms.test` | `Group3@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000003`) |
+| **Group 4 — Terracotta Cliff** | `group4@verandapms.test` | `Group4@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000004`) |
+| **Group 5 — Solstice Horizon** | `group5@verandapms.test` | `Group5@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000005`) |
 
 ---
 

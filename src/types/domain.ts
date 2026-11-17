@@ -26,6 +26,8 @@ export interface UserRecord {
   failedLoginAttempts: number;
   lockedUntil: string | null;
   lowAllotmentAlerts: boolean;
+  groupId?: string;
+  ownedSandboxId?: string;
   createdAt: string;
 }
 
@@ -99,6 +101,8 @@ export interface PasswordResetToken {
 
 export interface SandboxDatabase {
   sandboxId: string;
+  ownerGroupId?: string | null;
+  ownerGroupName?: string | null;
   theme: "dark" | "light";
   anchorDateIso: string;
   users: UserRecord[];

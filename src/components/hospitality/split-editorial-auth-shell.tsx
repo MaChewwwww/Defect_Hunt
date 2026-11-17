@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   RotateCcw,
 } from "lucide-react";
+import { COMPETITION_GROUPS } from "@/lib/domain/seed";
 import { useSandbox } from "@/lib/store/sandbox-store";
 
 export function SplitEditorialAuthShell({
@@ -189,6 +190,27 @@ export function SplitEditorialAuthShell({
                   <div className="text-[var(--ink-muted)]">
                     former@verandapms.test / Former@123
                   </div>
+                </div>
+              </div>
+
+              <div className="border-t border-[var(--border-subtle)] pt-2.5 space-y-1.5">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-muted)]">
+                  Group Accounts (Isolated Data per Group)
+                </div>
+                <div className="space-y-1 font-mono-tabular">
+                  {COMPETITION_GROUPS.map((group) => (
+                    <div
+                      key={group.id}
+                      className="flex flex-wrap items-center justify-between gap-x-2 text-[var(--ink-secondary)]"
+                    >
+                      <span className="font-sans font-medium text-[var(--ink-primary)]">
+                        {group.name}
+                      </span>
+                      <span>
+                        {group.email} / {group.password}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

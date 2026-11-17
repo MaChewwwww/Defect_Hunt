@@ -223,4 +223,32 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
     );
     expect(rawDb).toContain('"password":"Admin@123"');
   });
+
+  test("Multi-group ownership: Group 1 mutation stays isolated from Group 2", async ({
+    page,
+  }) => {
+    await resetSandboxAndSignIn(page, "group1@verandapms.test", "Group1@123");
+    await expect(page.getByTestId("workspace-owner-group")).toContainText(
+      "Group 1"
+    );
+
+    await page.goto("/rooms/rm-1001");
+    await page.getByTestId("room-detail-delete").click();
+    await expect(page).toHaveURL(/\/rooms$/);
+    await expect(page.getByTestId("room-row-SB-1001")).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Sign out" }).first().click();
+    await expect(page).toHaveURL(/\/login/);
+
+    await page.locator("#login-email").fill("group2@verandapms.test");
+    await page.locator("#login-password").fill("Group2@123");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page.getByTestId("workspace-owner-group")).toContainText(
+      "Group 2"
+    );
+
+    await page.goto("/rooms");
+    await expect(page.getByTestId("room-row-SB-1001")).toBeVisible();
+  });
 });
