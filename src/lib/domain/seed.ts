@@ -871,8 +871,8 @@ export function createInitialSandboxDb(
 
   return {
     sandboxId,
-    ownerGroupId: ownerGroup?.id ?? targetGroup.id,
-    ownerGroupName: ownerGroup?.name ?? targetGroup.name,
+    ownerGroupId: ownerGroup?.id ?? null,
+    ownerGroupName: ownerGroup?.name ?? null,
     theme: "dark",
     anchorDateIso: nowIso,
     users,

@@ -14,7 +14,6 @@ import {
   LOW_ALLOTMENT_THRESHOLD,
 } from "@/lib/domain/calculations";
 import {
-  COMPETITION_GROUPS,
   createInitialSandboxDb,
   resolveGroupByEmail,
 } from "@/lib/domain/seed";
@@ -159,7 +158,7 @@ function readLatestDbFromStorage(fallback: SandboxDatabase | null): SandboxDatab
     }
   }
   if (fallback) return fallback;
-  return createInitialSandboxDb(COMPETITION_GROUPS[0].sandboxId, new Date());
+  return createInitialSandboxDb(generateUuid(), new Date());
 }
 
 export function SandboxProvider({ children }: { children: React.ReactNode }) {
@@ -210,7 +209,7 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
 
     let sandboxId = window.localStorage.getItem(STORAGE_SANDBOX_ID_KEY);
     if (!sandboxId) {
-      sandboxId = COMPETITION_GROUPS[0].sandboxId;
+      sandboxId = generateUuid();
       window.localStorage.setItem(STORAGE_SANDBOX_ID_KEY, sandboxId);
     }
 
@@ -286,7 +285,7 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
     const sandboxId =
       (typeof window !== "undefined" &&
         window.localStorage.getItem(STORAGE_SANDBOX_ID_KEY)) ||
-      COMPETITION_GROUPS[0].sandboxId;
+      generateUuid();
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_SANDBOX_ID_KEY, sandboxId);
     }
