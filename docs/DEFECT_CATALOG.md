@@ -17,16 +17,17 @@
 
 ## Test Accounts
 
-| Role | Email | Password | Notes |
+Each competition group (`1`–`5`) has its own isolated sandbox (`00000000-0000-4000-8000-000000000001`..`00000000-0000-4000-8000-000000000005`) with 3 seeded role accounts:
+
+| Group / Role | Email | Password | Notes |
 |---|---|---|---|
-| **Admin** | `admin@verandapms.test` | `Admin@123` | Elena Marasigan (General Manager) |
-| **Staff** | `staff@verandapms.test` | `Staff@123` | Marco Villanueva (Front Desk Concierge) |
-| **Staff (deactivated)** | `former@verandapms.test` | `Former@123` | Tricia Soriano, inactive (`is_active = false`) |
-| **Group 1 — Coral Villa** | `group1@verandapms.test` | `Group1@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000001`) |
-| **Group 2 — Cypress Cove** | `group2@verandapms.test` | `Group2@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000002`) |
-| **Group 3 — Lagoon Sanctuary** | `group3@verandapms.test` | `Group3@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000003`) |
-| **Group 4 — Terracotta Cliff** | `group4@verandapms.test` | `Group4@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000004`) |
-| **Group 5 — Solstice Horizon** | `group5@verandapms.test` | `Group5@123` | Admin, isolated sandbox (`00000000-0000-4000-8000-000000000005`) |
+| **Group 1 — Coral Villa (Admin)** | `admin.group1@verandapms.test` | `Admin@123` | Elena Marasigan (isolated Group 1 sandbox) |
+| **Group 1 — Coral Villa (Staff)** | `staff.group1@verandapms.test` | `Staff@123` | Marco Villanueva (isolated Group 1 sandbox) |
+| **Group 1 — Coral Villa (Deactivated)** | `former.group1@verandapms.test` | `Former@123` | Tricia Soriano, inactive (isolated Group 1 sandbox) |
+| **Group 2 — Cypress Cove (Admin / Staff / Deactivated)** | `admin.group2` / `staff.group2` / `former.group2@verandapms.test` | `Admin@123` / `Staff@123` / `Former@123` | Isolated Group 2 sandbox (`...0002`) |
+| **Group 3 — Lagoon Sanctuary (Admin / Staff / Deactivated)** | `admin.group3` / `staff.group3` / `former.group3@verandapms.test` | `Admin@123` / `Staff@123` / `Former@123` | Isolated Group 3 sandbox (`...0003`) |
+| **Group 4 — Terracotta Cliff (Admin / Staff / Deactivated)** | `admin.group4` / `staff.group4` / `former.group4@verandapms.test` | `Admin@123` / `Staff@123` / `Former@123` | Isolated Group 4 sandbox (`...0004`) |
+| **Group 5 — Solstice Horizon (Admin / Staff / Deactivated)** | `admin.group5` / `staff.group5` / `former.group5@verandapms.test` | `Admin@123` / `Staff@123` / `Former@123` | Isolated Group 5 sandbox (`...0005`) |
 
 ---
 
@@ -60,13 +61,13 @@
 
 | No. | ID | Module / Page | Category | Steps to Reproduce | Expected | Actual |
 |---|---|---|---|---|---|---|
-| 6 | `VH-01` | Auth / Login | Functional | On Login type ` admin@verandapms.test ` (leading or trailing space, as when pasted) with password `Admin@123`, click Sign in. | Email is trimmed and login succeeds. | Rejected with the generic `"Invalid email or password."` error. |
+| 6 | `VH-01` | Auth / Login | Functional | On Login type ` admin.group1@verandapms.test ` (leading or trailing space, as when pasted) with password `Admin@123`, click Sign in. | Email is trimmed and login succeeds. | Rejected with the generic `"Invalid email or password."` error. |
 | 7 | `VH-02` | Auth / Login | Usability | Fill valid credentials, put focus in the Password field, press `Enter`. Then put focus in the Email field and press `Enter`. | `Enter` submits the form from either field. | `Enter` in Password does nothing; `Enter` in Email submits. |
-| 8 | `VH-03` | Auth / Login | Security | Sign in with `nobody@verandapms.test` / any password, note the message. Then `admin@verandapms.test` / wrong password. | Identical message in both cases (`"Invalid email or password."`). | Unknown email: `"Invalid email or password."` Existing email: `"Incorrect email or password."` (account enumeration). |
-| 9 | `VH-06` | Auth / Register | Validation | Register with email `Admin@verandapms.test` (capital `A`). | Rejected as a duplicate (emails are unique, case-insensitive). | Account is created. (`admin@verandapms.test` in exact lowercase is rejected.) |
+| 8 | `VH-03` | Auth / Login | Security | Sign in with `nobody@verandapms.test` / any password, note the message. Then `admin.group1@verandapms.test` / wrong password. | Identical message in both cases (`"Invalid email or password."`). | Unknown email: `"Invalid email or password."` Existing email: `"Incorrect email or password."` (account enumeration). |
+| 9 | `VH-06` | Auth / Register | Validation | Register with email `Admin.group1@verandapms.test` (capital `A`). | Rejected as a duplicate (emails are unique, case-insensitive). | Account is created. (`admin.group1@verandapms.test` in exact lowercase is rejected.) |
 | 10 | `VH-08` | Auth / Session | Security | Sign in with `"Remember me"` unchecked. Open the app URL in a new tab (or close and reopen the browser). Check `DevTools > Application > Storage`. | Session is tab-scoped (`sessionStorage`); a new tab asks for login. | Session is stored in `localStorage` (`veranda.v1.session`); the new tab is already signed in. |
-| 11 | `VH-09` | Auth / Login | Security | Sign in as `former@verandapms.test` / `Former@123` with `"Remember me"` unchecked (blocked). Tick `"Remember me"` and sign in again. | Deactivated accounts are always blocked. | Login succeeds when `"Remember me"` is ticked. |
-| 12 | `VH-10` | Access control / Users | Security | Sign in as Staff (`staff@verandapms.test`). The `Users` menu item is hidden in the sidebar. Type `/users` in the address bar. | Access denied or redirect to `/dashboard`. | The `/users` page opens and is fully functional. |
+| 11 | `VH-09` | Auth / Login | Security | Sign in as `former.group1@verandapms.test` / `Former@123` with `"Remember me"` unchecked (blocked). Tick `"Remember me"` and sign in again. | Deactivated accounts are always blocked. | Login succeeds when `"Remember me"` is ticked. |
+| 12 | `VH-10` | Access control / Users | Security | Sign in as Staff (`staff.group1@verandapms.test`). The `Users` menu item is hidden in the sidebar. Type `/users` in the address bar. | Access denied or redirect to `/dashboard`. | The `/users` page opens and is fully functional. |
 | 13 | `VH-11` | Access control / Room detail | Security | Sign in as Staff. The Rooms & Packages list (`/rooms`) has no delete button. Open any room detail page (`/rooms/[id]`) and click `Delete`. | No Delete button for Staff on the detail page either. | Staff can see and click Delete to remove the room/package. |
 | 14 | `VH-12` | Users | Functional | Sign in as Admin, open `/users`, click `Deactivate` on your own row (`Elena Marasigan`). | Not allowed (button disabled or error message). | The admin deactivates their own account and is signed out on the next page load. |
 | 15 | `VH-16` | Dashboard | Functional | Dashboard, `"Last 30 days"` (contains Cancelled reservation `RSV-2037`). Compare `Total Revenue` with the sum of the non-cancelled reservation totals in the same period (Reservations list). | Cancelled reservations are excluded from revenue. | `Total Revenue` includes the cancelled reservation totals. |
@@ -98,9 +99,9 @@
 
 | No. | ID | Module / Page | Category | Steps to Reproduce | Expected | Actual |
 |---|---|---|---|---|---|---|
-| 37 | `VH-04` | Auth / Login | Security | Submit a wrong password 5 times for `admin@verandapms.test` until `"Too many attempts, try again later."` appears. Then enter `Admin@123` and sign in. | Login is blocked for a lockout period. | Login succeeds immediately; the lockout is only a message. |
+| 37 | `VH-04` | Auth / Login | Security | Submit a wrong password 5 times for `admin.group1@verandapms.test` until `"Too many attempts, try again later."` appears. Then enter `Admin@123` and sign in. | Login is blocked for a lockout period. | Login succeeds immediately; the lockout is only a message. |
 | 38 | `VH-05` | Auth / Register | Validation | Register with password `LongPassword12` and confirm `Different12345` (12+ characters). Compare with `Password1` / `Password2`. | `"Passwords do not match"` in both cases. | Mismatch is only caught when the password is shorter than 12 characters; the 12+ character case creates the account. |
-| 39 | `VH-07` | Auth / Reset password | Security | Forgot password for `staff@verandapms.test`, click `"Open reset link"`, copy the URL, set a new password. Open the copied URL again and set another password. | The link is single-use; the second visit shows an invalid/expired message. | The same link works again (until its 30-minute expiry). |
+| 39 | `VH-07` | Auth / Reset password | Security | Forgot password for `staff.group1@verandapms.test`, click `"Open reset link"`, copy the URL, set a new password. Open the copied URL again and set another password. | The link is single-use; the second visit shows an invalid/expired message. | The same link works again (until its 30-minute expiry). |
 | 40 | `VH-13` | Access control / Session | Security | Sign in as Staff. In `DevTools > Application > Local Storage` edit `veranda.v1.session`: change `"role":"staff"` to `"role":"admin"`. Reload. | Role comes from the user record; tampering has no effect. | `Users` menu and room delete buttons appear; the app trusts the stored session role. |
 | 41 | `VH-14` | Data storage | Security | Inspect `DevTools > Application > Local Storage > veranda.v1.db > users`. | Passwords are hashed. | Passwords are stored in plain text (`"password":"Admin@123"`). |
 | 42 | `VH-15` | Reservations / Folio | Security | Create a reservation with notes `<img src=x onerror="alert(1)">`. Open the reservation detail (notes shown safely as text). Click `"View folio"`. | Notes are escaped everywhere. | The alert fires on the folio page only (stored XSS). |

@@ -100,7 +100,7 @@ All fonts are self-hosted via `@fontsource` packages:
 
 1. **`SplitEditorialAuthShell` (`src/components/hospitality/SplitEditorialAuthShell.tsx`)**:
    - Left pane: Architectural coastal resort illustration (sunlit archways & sea horizon SVG), **Solstice Bay Resort & Villas** crest, headline *"Room inventory, guest reservations, and folio billing in one composed workspace."*, 4 feature pills (`Live room allotments`, `Folio billing & VAT`, `Occupancy analytics`, `Role-based concierge access`), and fictional disclaimer.
-   - Right pane: Auth card (`Sign in`, `Create account`, or `Forgot password`) + interactive **DEMO ACCOUNTS** vault card showing Admin (`admin@verandapms.test / Admin@123`), Staff (`staff@verandapms.test / Staff@123`), and Staff deactivated (`former@verandapms.test / Former@123`).
+   - Right pane: Auth card (`Sign in`, `Create account`, or `Forgot password`) + interactive **GROUP ACCOUNTS (ISOLATED DATA PER GROUP)** card showing Groups 1–5, each with its own Admin (`admin.groupN@verandapms.test / Admin@123`), Staff (`staff.groupN@verandapms.test / Staff@123`), and Staff deactivated (`former.groupN@verandapms.test / Former@123`).
    - Footer bar: `"Veranda PMS demo environment"` on the left/center and `"Reset demo data"` action button on the right.
 2. **`AllotmentHealthBar` (`src/components/hospitality/AllotmentHealthBar.tsx`)**:
    - Visual indicator on Room & Package rows and detail pages showing current `available_units` with semantic status badges (`In Service`, `Low Allotment` when `1..5`, `Out of Allotment` when `<= 0`).

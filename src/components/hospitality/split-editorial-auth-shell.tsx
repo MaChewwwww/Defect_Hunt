@@ -161,57 +161,48 @@ export function SplitEditorialAuthShell({
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-7 shadow-xl space-y-5">
             {children}
 
-            {/* Demo Accounts Box */}
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)]/70 p-4 space-y-2.5 text-xs">
+            {/* Group Accounts Box */}
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)]/70 p-4 space-y-3 text-xs">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-muted)]">
-                Demo Accounts
+                Group Accounts (Isolated Data per Group)
               </div>
-              <div className="space-y-1.5 font-mono-tabular">
-                <div>
-                  <span className="font-sans font-semibold text-[var(--ink-primary)]">
-                    Admin
-                  </span>
-                  <div className="text-[var(--ink-secondary)]">
-                    admin@verandapms.test / Admin@123
-                  </div>
-                </div>
-                <div>
-                  <span className="font-sans font-semibold text-[var(--ink-primary)]">
-                    Staff
-                  </span>
-                  <div className="text-[var(--ink-secondary)]">
-                    staff@verandapms.test / Staff@123
-                  </div>
-                </div>
-                <div>
-                  <span className="font-sans font-semibold text-[var(--ink-primary)]">
-                    Staff (deactivated)
-                  </span>
-                  <div className="text-[var(--ink-muted)]">
-                    former@verandapms.test / Former@123
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-[var(--border-subtle)] pt-2.5 space-y-1.5">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-muted)]">
-                  Group Accounts (Isolated Data per Group)
-                </div>
-                <div className="space-y-1 font-mono-tabular">
-                  {COMPETITION_GROUPS.map((group) => (
+              <div className="space-y-3">
+                {COMPETITION_GROUPS.map((group) => {
+                  const groupAccounts = [
+                    group.accounts.admin,
+                    group.accounts.staff,
+                    group.accounts.deactivated,
+                  ];
+                  return (
                     <div
                       key={group.id}
-                      className="flex flex-wrap items-center justify-between gap-x-2 text-[var(--ink-secondary)]"
+                      className="border-t border-[var(--border-subtle)] first:border-t-0 pt-2.5 first:pt-0 space-y-1"
                     >
-                      <span className="font-sans font-medium text-[var(--ink-primary)]">
+                      <div className="font-sans font-semibold text-[var(--ink-primary)]">
                         {group.name}
-                      </span>
-                      <span>
-                        {group.email} / {group.password}
-                      </span>
+                      </div>
+                      <div className="space-y-0.5 font-mono-tabular">
+                        {groupAccounts.map((acct) => (
+                          <div
+                            key={acct.email}
+                            className={`flex flex-wrap items-center justify-between gap-x-2 ${
+                              acct.isActive
+                                ? "text-[var(--ink-secondary)]"
+                                : "text-[var(--ink-muted)]"
+                            }`}
+                          >
+                            <span className="font-sans font-medium">
+                              {acct.label}
+                            </span>
+                            <span>
+                              {acct.email} / {acct.password}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             </div>
           </div>

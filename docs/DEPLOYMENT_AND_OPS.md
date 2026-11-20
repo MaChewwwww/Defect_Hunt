@@ -46,7 +46,7 @@ SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 4. Deploy and run the post-deployment smoke check:
    - Open `/login` in a browser set to `Asia/Manila` (`UTC+8`).
    - Click **Reset demo data** in the bottom-right footer.
-   - Sign in with `admin@verandapms.test` / `Admin@123`.
+   - Sign in with `admin.group1@verandapms.test` / `Admin@123`.
    - Verify Dashboard KPIs, `/rooms`, `/reservations`, `/guests`, `/reports`, `/users`, and `/settings`.
 
 ---
@@ -56,7 +56,7 @@ SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 ### Before the Event Round Starts
 1. Run `pnpm test:e2e` against the deployed preview/production URL to verify all 60 planted defects (`VH-01`..`VH-60`) reproduce cleanly.
 2. Run `pnpm db:reset` before each competition wave to ensure all 5 group sandboxes (`00000000-0000-4000-8000-000000000001`..`00000000-0000-4000-8000-000000000005`) are cleanly seeded.
-3. Distribute only the **Live URL**, **Competition Group Accounts** (`group1@verandapms.test` / `Group1@123` through `group5@verandapms.test` / `Group5@123`, each owning isolated resort data), and **Role Test Accounts** (`admin@verandapms.test`, `staff@verandapms.test`, `former@verandapms.test`) to contestants.
+3. Distribute only the **Live URL** and each team's **Competition Group Accounts** (`admin.groupN@verandapms.test` / `Admin@123`, `staff.groupN@verandapms.test` / `Staff@123`, `former.groupN@verandapms.test` / `Former@123` for `N = 1..5`, each group owning isolated resort data) to contestants.
 4. **Never share** `docs/DEFECT_CATALOG.md` or the generated `Veranda_PMS_Defect_List.docx` with contestants; provide it exclusively to official event judges and validators.
 
 ### During the Competition

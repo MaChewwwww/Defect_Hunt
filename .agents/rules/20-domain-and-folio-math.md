@@ -24,10 +24,10 @@ Follow [PROJECT_OVERVIEW.md](../../docs/PROJECT_OVERVIEW.md), [DATABASE.md](../.
 ## Named Seed Entities (Do Not Rename or Alter Values)
 
 Several planted defects (`VH-16` through `VH-51`) depend on exact seed names, codes, rates, and quantities defined in [DATABASE.md](../../docs/DATABASE.md):
-- **Demo Accounts**:
-  - Admin: `admin@verandapms.test` / `Admin@123` (`Elena Marasigan`)
-  - Staff: `staff@verandapms.test` / `Staff@123` (`Marco Villanueva`)
-  - Staff (deactivated): `former@verandapms.test` / `Former@123` (`Tricia Soriano`, inactive)
+- **Per-Group Demo Accounts (`N = 1..5`, isolated sandbox per group)**:
+  - Admin: `admin.groupN@verandapms.test` / `Admin@123` (`Elena Marasigan`)
+  - Staff: `staff.groupN@verandapms.test` / `Staff@123` (`Marco Villanueva`)
+  - Staff (deactivated): `former.groupN@verandapms.test` / `Former@123` (`Tricia Soriano`, inactive)
 - **Critical Rooms & Packages**:
   - `SB-1001`: `Premier Oceanfront Villa` (Rate `6,400.00`, Allotment `12`, Category `Villas & Suites`)
   - `SB-1002`: `Teakwood Lanai Daybed` (Rate `500.00`, Allotment `26`) — booked x2 in `RSV-2045` (`Grand Total = 1,370.00`)

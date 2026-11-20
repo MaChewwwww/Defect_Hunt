@@ -13,68 +13,76 @@ import {
   SERVICE_ENVIRONMENTAL_FEE,
 } from "./calculations";
 
-export interface CompetitionGroupConfig {
-  id: string;
-  sandboxId: string;
-  name: string;
+export interface CompetitionGroupAccount {
   userId: string;
   userName: string;
   email: string;
   password: string;
   role: UserRole;
+  isActive: boolean;
+  label: "Admin" | "Staff" | "Staff (deactivated)";
+}
+
+export interface CompetitionGroupConfig {
+  id: string;
+  number: number;
+  sandboxId: string;
+  name: string;
+  accounts: {
+    admin: CompetitionGroupAccount;
+    staff: CompetitionGroupAccount;
+    deactivated: CompetitionGroupAccount;
+  };
+}
+
+function buildCompetitionGroup(
+  number: number,
+  resortWing: string
+): CompetitionGroupConfig {
+  const padded = String(number).padStart(12, "0");
+  return {
+    id: `group-${number}`,
+    number,
+    sandboxId: `00000000-0000-4000-8000-${padded}`,
+    name: `Group ${number} — ${resortWing}`,
+    accounts: {
+      admin: {
+        userId: "usr-admin-01",
+        userName: "Elena Marasigan",
+        email: `admin.group${number}@verandapms.test`,
+        password: "Admin@123",
+        role: "admin",
+        isActive: true,
+        label: "Admin",
+      },
+      staff: {
+        userId: "usr-staff-01",
+        userName: "Marco Villanueva",
+        email: `staff.group${number}@verandapms.test`,
+        password: "Staff@123",
+        role: "staff",
+        isActive: true,
+        label: "Staff",
+      },
+      deactivated: {
+        userId: "usr-former-01",
+        userName: "Tricia Soriano",
+        email: `former.group${number}@verandapms.test`,
+        password: "Former@123",
+        role: "staff",
+        isActive: false,
+        label: "Staff (deactivated)",
+      },
+    },
+  };
 }
 
 export const COMPETITION_GROUPS: readonly CompetitionGroupConfig[] = [
-  {
-    id: "group-1",
-    sandboxId: "00000000-0000-4000-8000-000000000001",
-    name: "Group 1 — Coral Villa",
-    userId: "usr-group-01",
-    userName: "Group 1 Lead (Coral Villa)",
-    email: "group1@verandapms.test",
-    password: "Group1@123",
-    role: "admin",
-  },
-  {
-    id: "group-2",
-    sandboxId: "00000000-0000-4000-8000-000000000002",
-    name: "Group 2 — Cypress Cove",
-    userId: "usr-group-02",
-    userName: "Group 2 Lead (Cypress Cove)",
-    email: "group2@verandapms.test",
-    password: "Group2@123",
-    role: "admin",
-  },
-  {
-    id: "group-3",
-    sandboxId: "00000000-0000-4000-8000-000000000003",
-    name: "Group 3 — Lagoon Sanctuary",
-    userId: "usr-group-03",
-    userName: "Group 3 Lead (Lagoon Sanctuary)",
-    email: "group3@verandapms.test",
-    password: "Group3@123",
-    role: "admin",
-  },
-  {
-    id: "group-4",
-    sandboxId: "00000000-0000-4000-8000-000000000004",
-    name: "Group 4 — Terracotta Cliff",
-    userId: "usr-group-04",
-    userName: "Group 4 Lead (Terracotta Cliff)",
-    email: "group4@verandapms.test",
-    password: "Group4@123",
-    role: "admin",
-  },
-  {
-    id: "group-5",
-    sandboxId: "00000000-0000-4000-8000-000000000005",
-    name: "Group 5 — Solstice Horizon",
-    userId: "usr-group-05",
-    userName: "Group 5 Lead (Solstice Horizon)",
-    email: "group5@verandapms.test",
-    password: "Group5@123",
-    role: "admin",
-  },
+  buildCompetitionGroup(1, "Coral Villa"),
+  buildCompetitionGroup(2, "Cypress Cove"),
+  buildCompetitionGroup(3, "Lagoon Sanctuary"),
+  buildCompetitionGroup(4, "Terracotta Cliff"),
+  buildCompetitionGroup(5, "Solstice Horizon"),
 ];
 
 /**
@@ -85,7 +93,13 @@ export function resolveGroupByEmail(
   rawEmail: string
 ): CompetitionGroupConfig | undefined {
   const normalized = rawEmail.toLowerCase();
-  return COMPETITION_GROUPS.find((g) => g.email.toLowerCase() === normalized);
+  return COMPETITION_GROUPS.find((g) =>
+    [
+      g.accounts.admin.email,
+      g.accounts.staff.email,
+      g.accounts.deactivated.email,
+    ].some((email) => email.toLowerCase() === normalized)
+  );
 }
 
 /**
@@ -189,62 +203,35 @@ export function createInitialSandboxDb(
   anchorNow: Date = new Date()
 ): SandboxDatabase {
   const nowIso = anchorNow.toISOString();
+  const ownerGroup = resolveGroupBySandboxId(sandboxId);
+  const targetGroup = ownerGroup ?? COMPETITION_GROUPS[0];
 
   // @defect VH-14 (Hard | Data storage | Security)
   // Expected: Passwords are stored as cryptographic hashes.
   // Actual: User passwords are stored in plain text inside veranda.v1.db > users.
   const users: UserRecord[] = [
+    { account: targetGroup.accounts.admin, daysAgo: 120, hour: 9, minute: 0 },
+    { account: targetGroup.accounts.staff, daysAgo: 110, hour: 9, minute: 30 },
     {
-      id: "usr-admin-01",
-      name: "Elena Marasigan",
-      email: "admin@verandapms.test",
-      password: "Admin@123",
-      role: "admin",
-      isActive: true,
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      lowAllotmentAlerts: true,
-      createdAt: manilaRelativeDays(anchorNow, 120, 9, 0),
+      account: targetGroup.accounts.deactivated,
+      daysAgo: 180,
+      hour: 10,
+      minute: 0,
     },
-    {
-      id: "usr-staff-01",
-      name: "Marco Villanueva",
-      email: "staff@verandapms.test",
-      password: "Staff@123",
-      role: "staff",
-      isActive: true,
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      lowAllotmentAlerts: true,
-      createdAt: manilaRelativeDays(anchorNow, 110, 9, 30),
-    },
-    {
-      id: "usr-former-01",
-      name: "Tricia Soriano",
-      email: "former@verandapms.test",
-      password: "Former@123",
-      role: "staff",
-      isActive: false,
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      lowAllotmentAlerts: true,
-      createdAt: manilaRelativeDays(anchorNow, 180, 10, 0),
-    },
-    ...COMPETITION_GROUPS.map((group) => ({
-      id: group.userId,
-      name: group.userName,
-      email: group.email,
-      password: group.password,
-      role: group.role,
-      isActive: true,
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      lowAllotmentAlerts: true,
-      groupId: group.id,
-      ownedSandboxId: group.sandboxId,
-      createdAt: manilaRelativeDays(anchorNow, 90, 9, 0),
-    })),
-  ];
+  ].map(({ account, daysAgo, hour, minute }) => ({
+    id: account.userId,
+    name: account.userName,
+    email: account.email,
+    password: account.password,
+    role: account.role,
+    isActive: account.isActive,
+    failedLoginAttempts: 0,
+    lockedUntil: null,
+    lowAllotmentAlerts: true,
+    groupId: targetGroup.id,
+    ownedSandboxId: targetGroup.sandboxId,
+    createdAt: manilaRelativeDays(anchorNow, daysAgo, hour, minute),
+  }));
 
   // 20 Rooms & Packages:
   // - Exactly 12 in "Villas & Suites" (for VH-25 page 2 filter drop)
@@ -882,12 +869,10 @@ export function createInitialSandboxDb(
     ),
   ];
 
-  const ownerGroup = resolveGroupBySandboxId(sandboxId);
-
   return {
     sandboxId,
-    ownerGroupId: ownerGroup?.id ?? null,
-    ownerGroupName: ownerGroup?.name ?? null,
+    ownerGroupId: ownerGroup?.id ?? targetGroup.id,
+    ownerGroupName: ownerGroup?.name ?? targetGroup.name,
     theme: "dark",
     anchorDateIso: nowIso,
     users,

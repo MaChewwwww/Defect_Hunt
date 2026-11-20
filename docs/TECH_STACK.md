@@ -50,7 +50,7 @@ Because **Veranda PMS** is a **Defect Hunt** competition target, several technic
    - The application reads the browser's runtime timezone while storing canonical ISO-8601 UTC timestamps (`TIMESTAMPTZ`).
    - This allows `VH-18` (Dashboard monthly chart groups by UTC month instead of local month) and `VH-44` (Reservation detail page displays UTC time instead of local time) to behave identically to real-world timezone bugs when tested in `Asia/Manila` (`UTC+8`).
 3. **Simulated In-App Password Reset Link Preview**:
-   - Instead of requiring external SMTP email delivery (which would fail on `.test` domains like `staff@verandapms.test`), submitting the Forgot Password form generates a signed token in `password_reset_tokens` and displays an in-app `"Open reset link"` button/preview card so contestants can immediately test `VH-07` (reusable password reset link within its 30-minute expiry window).
+   - Instead of requiring external SMTP email delivery (which would fail on `.test` domains like `staff.group1@verandapms.test`), submitting the Forgot Password form generates a signed token in `password_reset_tokens` and displays an in-app `"Open reset link"` button/preview card so contestants can immediately test `VH-07` (reusable password reset link within its 30-minute expiry window).
 
 ---
 

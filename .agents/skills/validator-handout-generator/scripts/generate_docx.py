@@ -123,20 +123,45 @@ def generate_veranda_docx(
     set_cell_text(sys_tbl.rows[2].cells[0], "Total defects")
     set_cell_text(sys_tbl.rows[2].cells[1], "60  (Easy 5, Medium 31, Hard 24)")
 
-    # Table 1: Test accounts (3 role accounts + 5 isolated competition groups)
+    # Table 1: Test accounts (5 isolated competition groups, each with Admin, Staff, and Deactivated Staff)
     acct_tbl = doc.tables[1]
-    accounts = [
-        ("Admin", "admin@verandapms.test", "Admin@123", "Elena Marasigan"),
-        ("Staff", "staff@verandapms.test", "Staff@123", "Marco Villanueva"),
-        ("Staff (deactivated)", "former@verandapms.test", "Former@123", "Tricia Soriano, inactive"),
-        ("Group 1 - Coral Villa", "group1@verandapms.test", "Group1@123", "Admin (isolated Group 1 data)"),
-        ("Group 2 - Cypress Cove", "group2@verandapms.test", "Group2@123", "Admin (isolated Group 2 data)"),
-        ("Group 3 - Lagoon Sanctuary", "group3@verandapms.test", "Group3@123", "Admin (isolated Group 3 data)"),
-        ("Group 4 - Terracotta Cliff", "group4@verandapms.test", "Group4@123", "Admin (isolated Group 4 data)"),
-        ("Group 5 - Solstice Horizon", "group5@verandapms.test", "Group5@123", "Admin (isolated Group 5 data)"),
+    groups = [
+        (1, "Coral Villa"),
+        (2, "Cypress Cove"),
+        (3, "Lagoon Sanctuary"),
+        (4, "Terracotta Cliff"),
+        (5, "Solstice Horizon"),
     ]
+    accounts = []
+    for num, wing in groups:
+        accounts.append(
+            (
+                f"Group {num} - {wing} (Admin)",
+                f"admin.group{num}@verandapms.test",
+                "Admin@123",
+                f"Elena Marasigan (isolated Group {num} data)",
+            )
+        )
+        accounts.append(
+            (
+                f"Group {num} - {wing} (Staff)",
+                f"staff.group{num}@verandapms.test",
+                "Staff@123",
+                f"Marco Villanueva (isolated Group {num} data)",
+            )
+        )
+        accounts.append(
+            (
+                f"Group {num} - {wing} (Deactivated)",
+                f"former.group{num}@verandapms.test",
+                "Former@123",
+                f"Tricia Soriano, inactive (Group {num})",
+            )
+        )
     while len(acct_tbl.rows) < len(accounts) + 1:
         acct_tbl._tbl.append(copy.deepcopy(acct_tbl.rows[1]._tr))
+    while len(acct_tbl.rows) > len(accounts) + 1:
+        acct_tbl._tbl.remove(acct_tbl.rows[-1]._tr)
     for idx, acct_vals in enumerate(accounts, start=1):
         for cell, val in zip(acct_tbl.rows[idx].cells, acct_vals):
             set_cell_text(cell, val)

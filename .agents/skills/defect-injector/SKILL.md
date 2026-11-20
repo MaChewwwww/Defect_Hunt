@@ -33,8 +33,8 @@ Many defects in `docs/DEFECT_CATALOG.md` explicitly require a **contrast** betwe
 |---|---|---|
 | `VH-02` | Pressing `Enter` in the **Email** field submits Login. | Pressing `Enter` in the **Password** field does nothing. |
 | `VH-05` | Password mismatch `< 12` chars (`Password1` / `Password2`) shows `"Passwords do not match"`. | Password mismatch `>= 12` chars (`LongPassword12` / `Different12345`) creates the account. |
-| `VH-06` | Registering `admin@verandapms.test` (exact case) is rejected. | Registering `Admin@verandapms.test` (capital A) is accepted. |
-| `VH-09` | `former@verandapms.test` with `"Remember me"` **unchecked** is blocked. | `former@verandapms.test` with `"Remember me"` **checked** logs in. |
+| `VH-06` | Registering `admin.group1@verandapms.test` (exact case) is rejected. | Registering `Admin.group1@verandapms.test` (capital A) is accepted. |
+| `VH-09` | `former.group1@verandapms.test` with `"Remember me"` **unchecked** is blocked. | `former.group1@verandapms.test` with `"Remember me"` **checked** logs in. |
 | `VH-10` | Sidebar hides `Users` menu item for `staff`. | Navigating directly to `/users` as `staff` opens the functional page. |
 | `VH-11` & `VH-27` | `/rooms` list hides Delete for `staff` and shows confirmation dialog for `admin`. | `/rooms/[id]` detail page shows Delete for `staff` (`VH-11`) and deletes immediately without confirmation (`VH-27`). |
 | `VH-15` | Reservation `notes` with `<img src=x onerror="alert(1)">` render as safe text on `/reservations/[id]`. | Clicking `"View folio"` (`/reservations/[id]/folio`) executes the `onerror` alert. |

@@ -50,7 +50,7 @@ Stores resort staff and administrator accounts per sandbox.
 | `email` | `VARCHAR(255)` | `NOT NULL` | Account email address. |
 | `password` | `VARCHAR(255)` | `NOT NULL` | Stored password (`// @defect VH-14`: stored as plaintext in seed/mirror instead of a cryptographic hash). |
 | `role` | `VARCHAR(16)` | `NOT NULL CHECK (role IN ('admin', 'staff'))` | Application role (`admin` or `staff`). |
-| `is_active` | `BOOLEAN` | `NOT NULL DEFAULT true` | Whether the account is active (`false` for `former@verandapms.test`). |
+| `is_active` | `BOOLEAN` | `NOT NULL DEFAULT true` | Whether the account is active (`false` for `former.groupN@verandapms.test`). |
 | `failed_login_attempts` | `INT` | `NOT NULL DEFAULT 0` | Counter for brute-force lockout display (`VH-04`). |
 | `locked_until` | `TIMESTAMPTZ` | `NULL` | Canonical lockout timestamp (`// @defect VH-04`: checked only for displaying message, not enforced on valid password). |
 | `low_allotment_alerts` | `BOOLEAN` | `NOT NULL DEFAULT true` | User notification setting (`Settings > Notifications`). |
@@ -145,7 +145,7 @@ To ensure 100% compatibility with browser DevTools inspection defects (`VH-08`, 
    ```json
    {
      "userId": "usr-staff-01",
-     "email": "staff@verandapms.test",
+     "email": "staff.group1@verandapms.test",
      "name": "Marco Villanueva",
      "role": "staff",
      "rememberMe": false,
@@ -158,13 +158,13 @@ To ensure 100% compatibility with browser DevTools inspection defects (`VH-08`, 
 2. **`veranda.v1.db`**:
    ```json
    {
-     "sandboxId": "a1b2c3d4-...",
+     "sandboxId": "00000000-0000-4000-8000-000000000001",
      "theme": "dark",
      "users": [
        {
          "id": "usr-admin-01",
          "name": "Elena Marasigan",
-         "email": "admin@verandapms.test",
+         "email": "admin.group1@verandapms.test",
          "password": "Admin@123",
          "role": "admin",
          "isActive": true
@@ -184,17 +184,14 @@ To ensure 100% compatibility with browser DevTools inspection defects (`VH-08`, 
 
 The seed dataset is carefully calibrated so every single defect (`VH-01`..`VH-60`) has exact, named records and deterministic math:
 
-### 4.1 Seed Users (8 Accounts)
-| ID | Name | Email | Password | Role | Active | Owned Sandbox (`sandbox_id`) |
+### 4.1 Seed Users (3 Accounts per Competition Group `N = 1..5`)
+Each competition group sandbox (`00000000-0000-4000-8000-000000000001`..`00000000-0000-4000-8000-000000000005`) seeds its own isolated 3 role accounts:
+
+| ID | Name | Email Pattern (`N = 1..5`) | Password | Role | Active | Owned Sandbox (`sandbox_id`) |
 |---|---|---|---|---|---|---|
-| `usr-admin-01` | Elena Marasigan | `admin@verandapms.test` | `Admin@123` | `admin` | `true` | Active session sandbox |
-| `usr-staff-01` | Marco Villanueva | `staff@verandapms.test` | `Staff@123` | `staff` | `true` | Active session sandbox |
-| `usr-former-01` | Tricia Soriano | `former@verandapms.test` | `Former@123` | `staff` | `false` | Active session sandbox |
-| `usr-group-01` | Group 1 Lead (Coral Villa) | `group1@verandapms.test` | `Group1@123` | `admin` | `true` | `00000000-0000-4000-8000-000000000001` |
-| `usr-group-02` | Group 2 Lead (Cypress Cove) | `group2@verandapms.test` | `Group2@123` | `admin` | `true` | `00000000-0000-4000-8000-000000000002` |
-| `usr-group-03` | Group 3 Lead (Lagoon Sanctuary) | `group3@verandapms.test` | `Group3@123` | `admin` | `true` | `00000000-0000-4000-8000-000000000003` |
-| `usr-group-04` | Group 4 Lead (Terracotta Cliff) | `group4@verandapms.test` | `Group4@123` | `admin` | `true` | `00000000-0000-4000-8000-000000000004` |
-| `usr-group-05` | Group 5 Lead (Solstice Horizon) | `group5@verandapms.test` | `Group5@123` | `admin` | `true` | `00000000-0000-4000-8000-000000000005` |
+| `usr-admin-01` | Elena Marasigan | `admin.groupN@verandapms.test` | `Admin@123` | `admin` | `true` | `00000000-0000-4000-8000-00000000000N` |
+| `usr-staff-01` | Marco Villanueva | `staff.groupN@verandapms.test` | `Staff@123` | `staff` | `true` | `00000000-0000-4000-8000-00000000000N` |
+| `usr-former-01` | Tricia Soriano | `former.groupN@verandapms.test` | `Former@123` | `staff` | `false` | `00000000-0000-4000-8000-00000000000N` |
 
 ### 4.2 Key Seed Rooms & Packages (20 Items, `SB-1001` to `SB-1020`)
 - **Category `Villas & Suites` contains exactly 12 items** (so Page 1 shows 10 items and Page 2 shows 2 items when filtered by `Villas & Suites`, enabling `VH-25` pagination filter drop testing).

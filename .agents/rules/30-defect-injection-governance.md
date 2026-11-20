@@ -23,7 +23,7 @@ Whenever you write or touch code that implements one of the 60 planted defects, 
 Each planted defect must match its exact `Steps to Reproduce`, `Expected`, and `Actual` contract in [DEFECT_CATALOG.md](../../docs/DEFECT_CATALOG.md) without breaking adjacent features:
 - **`VH-02`**: Pressing `Enter` in Password does nothing, **but** pressing `Enter` in Email or clicking `Sign in` MUST submit the form cleanly.
 - **`VH-05`**: Password confirmation mismatch on `/register` MUST be caught when `password.length < 12`, and ignored only when `password.length >= 12`.
-- **`VH-09`**: Deactivated account `former@verandapms.test` MUST be blocked when `"Remember me"` is unchecked, and allowed only when `"Remember me"` is ticked.
+- **`VH-09`**: Deactivated account `former.groupN@verandapms.test` MUST be blocked when `"Remember me"` is unchecked, and allowed only when `"Remember me"` is ticked.
 - **`VH-11` & `VH-27`**: On the `/rooms` list page, `staff` must NOT see a Delete button and `admin` MUST get a confirmation modal before deletion. Only on `/rooms/[id]` (detail page) does `staff` see the Delete button (`VH-11`) and deletion happens immediately without confirmation (`VH-27`).
 - **`VH-15`**: Reservation `notes` MUST be safely escaped on `/reservations/[id]` (detail view) and unescaped (`dangerouslySetInnerHTML` / script-triggering image handler) ONLY on `/reservations/[id]/folio`.
 - **`VH-25`**: Paginating `/rooms` to Page 2 drops ONLY the `Category` filter; `search`, `status`, and `sort` MUST be preserved across pagination.

@@ -31,15 +31,15 @@ Unlike a standard application where tests only assert defect-free behavior, **Ve
 
 | Test ID | Defect ID | Tier | Automated Assertion Summary |
 |---|---|---|---|
-| `T-VH-01` | `VH-01` | Medium | Submitting `" admin@verandapms.test "` with `Admin@123` stays on `/login` and shows `"Invalid email or password."` |
+| `T-VH-01` | `VH-01` | Medium | Submitting `" admin.group1@verandapms.test "` with `Admin@123` stays on `/login` and shows `"Invalid email or password."` |
 | `T-VH-02` | `VH-02` | Medium | Focusing Password input and pressing `Enter` does not submit; focusing Email input and pressing `Enter` submits and redirects to `/dashboard`. |
-| `T-VH-03` | `VH-03` | Medium | `nobody@verandapms.test` shows `"Invalid email or password."`; `admin@verandapms.test` with wrong password shows `"Incorrect email or password."` |
-| `T-VH-04` | `VH-04` | Hard | After 5 failed attempts on `admin@verandapms.test` showing `"Too many attempts, try again later."`, submitting `Admin@123` on attempt 6 succeeds immediately. |
+| `T-VH-03` | `VH-03` | Medium | `nobody@verandapms.test` shows `"Invalid email or password."`; `admin.group1@verandapms.test` with wrong password shows `"Incorrect email or password."` |
+| `T-VH-04` | `VH-04` | Hard | After 5 failed attempts on `admin.group1@verandapms.test` showing `"Too many attempts, try again later."`, submitting `Admin@123` on attempt 6 succeeds immediately. |
 | `T-VH-05` | `VH-05` | Hard | `/register` with `Password1` / `Password2` (length 9) fails with `"Passwords do not match"`; `LongPassword12` / `Different12345` (length 14) succeeds. |
-| `T-VH-06` | `VH-06` | Medium | `/register` with `admin@verandapms.test` fails as duplicate; `Admin@verandapms.test` succeeds. |
-| `T-VH-07` | `VH-07` | Hard | `/forgot-password` for `staff@verandapms.test` -> open reset link -> set password -> revisit same reset link URL -> set password again succeeds. |
+| `T-VH-06` | `VH-06` | Medium | `/register` with `admin.group1@verandapms.test` fails as duplicate; `Admin.group1@verandapms.test` succeeds. |
+| `T-VH-07` | `VH-07` | Hard | `/forgot-password` for `staff.group1@verandapms.test` -> open reset link -> set password -> revisit same reset link URL -> set password again succeeds. |
 | `T-VH-08` | `VH-08` | Medium | Login with `"Remember me"` unchecked writes `veranda.v1.session` to `localStorage` and `sessionStorage` is empty; new tab is already authenticated. |
-| `T-VH-09` | `VH-09` | Medium | Login as `former@verandapms.test` / `Former@123` fails when `"Remember me"` is unchecked, but succeeds when `"Remember me"` is checked. |
+| `T-VH-09` | `VH-09` | Medium | Login as `former.group1@verandapms.test` / `Former@123` fails when `"Remember me"` is unchecked, but succeeds when `"Remember me"` is checked. |
 | `T-VH-10` | `VH-10` | Medium | Logged in as `staff`, sidebar has no `Users` link, but `page.goto('/users')` renders the full Users management table and controls. |
 | `T-VH-11` | `VH-11` | Medium | Logged in as `staff`, `/rooms` rows have no Delete button, but `/rooms/rm-1001` renders a working `Delete` button. |
 | `T-VH-12` | `VH-12` | Medium | Logged in as `admin`, clicking `Deactivate` on `Elena Marasigan` in `/users` deactivates the account and signs out on reload. |

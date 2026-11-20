@@ -54,8 +54,8 @@ All workspace routes render inside the responsive shell (248px collapsible sideb
 
 | Form | Field | Canonical Rule | Planted Defect Override |
 |---|---|---|---|
-| **Login** | `email` | Required, trimmed, case-insensitive | `VH-01`: Not trimmed (`" admin@verandapms.test "` fails). |
-| **Register** | `email` | Required, unique (case-insensitive) | `VH-06`: Case-sensitive check allows `Admin@verandapms.test`. |
+| **Login** | `email` | Required, trimmed, case-insensitive | `VH-01`: Not trimmed (`" admin.group1@verandapms.test "` fails). |
+| **Register** | `email` | Required, unique (case-insensitive) | `VH-06`: Case-sensitive check allows `Admin.group1@verandapms.test`. |
 | **Register** | `confirmPassword` | Must equal `password` | `VH-05`: Only checked when `password.length < 12`. |
 | **Room / Package** | `name` | Required, trimmed length `>= 1` | `VH-23`: Checks `name.length > 0` without `.trim()`, allowing `"   "`. |
 | **Room / Package** | `code` | Required, unique (case-insensitive) | `VH-22`: Case-sensitive check allows `sb-1001` when `SB-1001` exists. |

@@ -2,7 +2,7 @@ import { expect, type Page } from "@playwright/test";
 
 export async function resetSandboxAndSignIn(
   page: Page,
-  email: string = "admin@verandapms.test",
+  email: string = "admin.group1@verandapms.test",
   password: string = "Admin@123"
 ) {
   await page.goto("/login");

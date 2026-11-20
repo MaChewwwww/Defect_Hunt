@@ -20,7 +20,7 @@ Use this skill whenever creating or styling pages, layouts, `shadcn/ui` componen
 ## 2. Custom Hospitality Components Checklist
 
 Always prefer these domain components over raw unstyled divs:
-1. **`SplitEditorialAuthShell`**: Left panel showcases **Solstice Bay Resort & Villas** branding, architectural coastal SVG graphic, headline, and 4 feature badges; right panel holds the auth form and the **DEMO ACCOUNTS** card (`admin@verandapms.test`, `staff@verandapms.test`, `former@verandapms.test`); bottom bar holds `"Veranda PMS demo environment"` and `"Reset demo data"`.
+1. **`SplitEditorialAuthShell`**: Left panel showcases **Solstice Bay Resort & Villas** branding, architectural coastal SVG graphic, headline, and 4 feature badges; right panel holds the auth form and the **GROUP ACCOUNTS (ISOLATED DATA PER GROUP)** card (`admin.groupN@verandapms.test`, `staff.groupN@verandapms.test`, `former.groupN@verandapms.test`); bottom bar holds `"Veranda PMS demo environment"` and `"Reset demo data"`.
 2. **`AllotmentHealthBar`**: Displays `available_units` with clear badge states (`In Stock` / `Available`, `Low Stock` / `Low Allotment` for `1..5`, `Out of stock` / `Out of allotment` for `<= 0`).
 3. **`FolioMathBreakdown`**: Renders Subtotal, Discount, 12% Tax (VAT), `250.00` Service & Environmental Fee, and Grand Total in aligned `tabular-nums`.
 4. **`GuestFolioPrintSheet`**: Renders `/reservations/[id]/folio` with clean `@media print` styling, resort header, `"Billed to"` block (omitting guest name per `VH-43`), line items, totals (omitting the `250.00` fee from Grand Total per `VH-43`), unescaped `notes` (`VH-15`), and footer `"Thank you for your purchse"` (`VH-57`).

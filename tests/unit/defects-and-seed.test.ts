@@ -18,7 +18,7 @@ describe("Veranda PMS Seed & Planted Domain Defects", () => {
   const db = createInitialSandboxDb("test-sandbox-01", anchorNow);
 
   it("seeds exact counts, plaintext passwords (VH-14), and category/allotment boundaries (VH-17, VH-25)", () => {
-    expect(db.users).toHaveLength(8);
+    expect(db.users).toHaveLength(3);
     expect(db.users[0].password).toBe("Admin@123"); // VH-14 plaintext check
 
     expect(db.roomsPackages).toHaveLength(20);
@@ -97,16 +97,37 @@ describe("Veranda PMS Seed & Planted Domain Defects", () => {
 
     for (let i = 0; i < COMPETITION_GROUPS.length; i += 1) {
       const group = COMPETITION_GROUPS[i];
-      const expectedEmail = `group${i + 1}@verandapms.test`;
-      expect(group.email).toBe(expectedEmail);
-      expect(resolveGroupByEmail(expectedEmail)?.sandboxId).toBe(group.sandboxId);
+      const groupNum = i + 1;
+      const expectedAdminEmail = `admin.group${groupNum}@verandapms.test`;
+      const expectedStaffEmail = `staff.group${groupNum}@verandapms.test`;
+      const expectedFormerEmail = `former.group${groupNum}@verandapms.test`;
+
+      expect(group.accounts.admin.email).toBe(expectedAdminEmail);
+      expect(group.accounts.staff.email).toBe(expectedStaffEmail);
+      expect(group.accounts.deactivated.email).toBe(expectedFormerEmail);
+
+      expect(resolveGroupByEmail(expectedAdminEmail)?.sandboxId).toBe(
+        group.sandboxId
+      );
+      expect(resolveGroupByEmail(expectedStaffEmail)?.sandboxId).toBe(
+        group.sandboxId
+      );
+      expect(resolveGroupByEmail(expectedFormerEmail)?.sandboxId).toBe(
+        group.sandboxId
+      );
       // Un-trimmed emails must not resolve a group (preserves VH-01)
-      expect(resolveGroupByEmail(` ${expectedEmail} `)).toBeUndefined();
+      expect(resolveGroupByEmail(` ${expectedAdminEmail} `)).toBeUndefined();
 
       seenSandboxes.add(group.sandboxId);
       const groupDb = createInitialSandboxDb(group.sandboxId, anchorNow);
       expect(groupDb.ownerGroupId).toBe(group.id);
       expect(groupDb.ownerGroupName).toBe(group.name);
+      expect(groupDb.users).toHaveLength(3);
+      expect(groupDb.users.map((u) => u.email)).toEqual([
+        expectedAdminEmail,
+        expectedStaffEmail,
+        expectedFormerEmail,
+      ]);
       expect(groupDb.roomsPackages).toHaveLength(20);
       expect(groupDb.reservations).toHaveLength(20);
     }

@@ -11,7 +11,7 @@ Follow [DESIGN.md](../../docs/DESIGN.md) and the `.agents/skills/shadcn-hospital
 
 ## Shell & Component Standards
 
-- **Login Screen (`/login`)**: Asymmetric split coastal hospitality layout (`SplitEditorialAuthShell`) with the **Solstice Bay Resort & Villas** crest, headline, 4 capability pills, Sign In card, **DEMO ACCOUNTS** reference card (`admin@verandapms.test`, `staff@verandapms.test`, `former@verandapms.test`), and footer bar with `"Veranda PMS demo environment"` and `"Reset demo data"`.
+- **Login Screen (`/login`)**: Asymmetric split coastal hospitality layout (`SplitEditorialAuthShell`) with the **Solstice Bay Resort & Villas** crest, headline, 4 capability pills, Sign In card, **GROUP ACCOUNTS (ISOLATED DATA PER GROUP)** reference card listing Groups 1–5 (`admin.groupN@verandapms.test`, `staff.groupN@verandapms.test`, `former.groupN@verandapms.test`), and footer bar with `"Veranda PMS demo environment"` and `"Reset demo data"`.
 - **Workspace Shell**:
   - 56px sticky topbar with breadcrumb/title, Theme toggle button (`>= 640px`), Notification Bell with numeric badge (`8` low-allotment items by default), and User profile chip (initials + full name).
   - 248px desktop sidebar collapsible to a 64px icon rail (`>= 640px`), and a slide-over mobile drawer below `640px`.

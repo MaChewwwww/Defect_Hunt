@@ -32,15 +32,15 @@ All guests, staff members, room codes, rates, and folio transactions in this sys
 
 ---
 
-## 3. User Roles & Seed Accounts
+## 3. User Roles & Per-Group Seed Accounts
 
-Veranda PMS defines two application roles (`admin` and `staff`) plus an inactive account state (`is_active = false`):
+Veranda PMS defines two application roles (`admin` and `staff`) plus an inactive account state (`is_active = false`), seeded separately for each of the 5 competition groups (`N = 1..5`):
 
-| Role | Seed Email | Seed Password | Persona & Responsibilities | Canonical Boundary |
+| Role | Seed Email Pattern (`N = 1..5`) | Seed Password | Persona & Responsibilities | Canonical Boundary |
 |---|---|---|---|---|
-| **Admin** (`admin`) | `admin@verandapms.test` | `Admin@123` | **Elena Marasigan** (General Manager). Full access to Dashboard, Rooms & Packages (including creation, editing, allotment adjustments, and deletion), Reservations & Folios, Guests, Reports, Staff Accounts (`/users`), and Settings. | Cannot deactivate her own currently signed-in Admin account (`FR-USER-04`). |
-| **Staff** (`staff`) | `staff@verandapms.test` | `Staff@123` | **Marco Villanueva** (Front Desk Concierge). Operational access to Dashboard, Rooms & Packages (view, create, edit, adjust allotment), Reservations & Folios, Guests, Reports, and personal Settings. | Cannot access `/users` (Staff management) and cannot delete Rooms & Packages (`FR-ROOM-05`, `FR-USER-01`). |
-| **Staff (Deactivated)** | `former@verandapms.test` | `Former@123` | **Tricia Soriano** (Former Concierge, `is_active = false`). Retained for historical reservation attribution and access-control testing. | Blocked from signing in under all login options (`FR-AUTH-04`). |
+| **Admin** (`admin`) | `admin.groupN@verandapms.test` | `Admin@123` | **Elena Marasigan** (General Manager). Full access to Dashboard, Rooms & Packages (including creation, editing, allotment adjustments, and deletion), Reservations & Folios, Guests, Reports, Staff Accounts (`/users`), and Settings. | Cannot deactivate her own currently signed-in Admin account (`FR-USER-04`). |
+| **Staff** (`staff`) | `staff.groupN@verandapms.test` | `Staff@123` | **Marco Villanueva** (Front Desk Concierge). Operational access to Dashboard, Rooms & Packages (view, create, edit, adjust allotment), Reservations & Folios, Guests, Reports, and personal Settings. | Cannot access `/users` (Staff management) and cannot delete Rooms & Packages (`FR-ROOM-05`, `FR-USER-01`). |
+| **Staff (Deactivated)** | `former.groupN@verandapms.test` | `Former@123` | **Tricia Soriano** (Former Concierge, `is_active = false`). Retained for historical reservation attribution and access-control testing. | Blocked from signing in under all login options (`FR-AUTH-04`). |
 
 ---
 

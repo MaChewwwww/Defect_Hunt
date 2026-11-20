@@ -35,13 +35,13 @@ flowchart TD
   - `VH-03`: Non-existent email returns `"Invalid email or password."` while wrong password on an existing email returns `"Incorrect email or password."`
   - `VH-04`: After 5 wrong attempts, `"Too many attempts, try again later."` is shown, but entering the valid password on the 6th attempt logs in immediately.
   - `VH-08`: Session is always written to `localStorage` (`veranda.v1.session`) even when `"Remember me"` is unchecked.
-  - `VH-09`: Signing in as deactivated user `former@verandapms.test` (`Former@123`) is blocked when `"Remember me"` is unchecked, but **succeeds** when `"Remember me"` is ticked.
+  - `VH-09`: Signing in as deactivated user `former.group1@verandapms.test` (`Former@123`) is blocked when `"Remember me"` is unchecked, but **succeeds** when `"Remember me"` is ticked.
 
 ### 2.2 Self-Registration (`/register`)
 - User enters Full Name, Email, Password, and Confirm Password.
 - **Planted Defect Deviations**:
   - `VH-05`: Password mismatch (`password !== confirmPassword`) is only rejected when `password.length < 12`; when `password.length >= 12`, mismatched confirmation is accepted and creates the account.
-  - `VH-06`: Email uniqueness check is case-sensitive (`Admin@verandapms.test` is allowed even though `admin@verandapms.test` exists).
+  - `VH-06`: Email uniqueness check is case-sensitive (`Admin.group1@verandapms.test` is allowed even though `admin.group1@verandapms.test` exists).
 
 ### 2.3 Forgot & Reset Password (`/forgot-password` -> `/reset-password?token=...`)
 - User submits their email on `/forgot-password`. An in-app simulated email banner displays an **"Open reset link"** button with a 30-minute token URL.

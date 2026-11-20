@@ -6,7 +6,7 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
     page,
   }) => {
     await page.goto("/login");
-    await page.locator("#login-email").fill(" admin@verandapms.test ");
+    await page.locator("#login-email").fill(" admin.group1@verandapms.test ");
     await page.locator("#login-password").fill("Admin@123");
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page.getByTestId("login-error")).toContainText(
@@ -18,7 +18,7 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
     page,
   }) => {
     await page.goto("/login");
-    await page.locator("#login-email").fill("admin@verandapms.test");
+    await page.locator("#login-email").fill("admin.group1@verandapms.test");
     await page.locator("#login-password").fill("Admin@123");
     await page.locator("#login-password").focus();
     await page.keyboard.press("Enter");
@@ -40,7 +40,7 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
       "Invalid email or password."
     );
 
-    await page.locator("#login-email").fill("admin@verandapms.test");
+    await page.locator("#login-email").fill("admin.group1@verandapms.test");
     await page.locator("#login-password").fill("WrongPassword");
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page.getByTestId("login-error")).toHaveText(
@@ -54,7 +54,7 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
     await page.goto("/login");
     await page.getByRole("button", { name: "Reset demo data" }).click();
     for (let i = 0; i < 5; i++) {
-      await page.locator("#login-email").fill("admin@verandapms.test");
+      await page.locator("#login-email").fill("admin.group1@verandapms.test");
       await page.locator("#login-password").fill("WrongPassword");
       await page.getByRole("button", { name: "Sign in" }).click();
     }
@@ -93,7 +93,7 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
   }) => {
     await page.goto("/register");
     await page.locator("#reg-name").fill("Dup Exact");
-    await page.locator("#reg-email").fill("admin@verandapms.test");
+    await page.locator("#reg-email").fill("admin.group1@verandapms.test");
     await page.locator("#reg-password").fill("Secret123");
     await page.locator("#reg-confirm").fill("Secret123");
     await page.getByRole("button", { name: "Create account" }).click();
@@ -101,7 +101,7 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
       "already exists"
     );
 
-    await page.locator("#reg-email").fill("Admin@verandapms.test");
+    await page.locator("#reg-email").fill("Admin.group1@verandapms.test");
     await page.getByRole("button", { name: "Create account" }).click();
     await expect(page).toHaveURL(/\/dashboard/);
   });
@@ -110,7 +110,7 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
     page,
   }) => {
     await page.goto("/forgot-password");
-    await page.locator("#fp-email").fill("staff@verandapms.test");
+    await page.locator("#fp-email").fill("staff.group1@verandapms.test");
     await page.getByRole("button", { name: "Send reset link" }).click();
     const link = page.getByRole("link", { name: "Open reset link" });
     await expect(link).toBeVisible();
@@ -135,11 +135,15 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
     page,
     context,
   }) => {
-    await resetSandboxAndSignIn(page, "staff@verandapms.test", "Staff@123");
+    await resetSandboxAndSignIn(
+      page,
+      "staff.group1@verandapms.test",
+      "Staff@123"
+    );
     const stored = await page.evaluate(() =>
       window.localStorage.getItem("veranda.v1.session")
     );
-    expect(stored).toContain("staff@verandapms.test");
+    expect(stored).toContain("staff.group1@verandapms.test");
 
     const tab2 = await context.newPage();
     await tab2.goto("/dashboard");
@@ -150,7 +154,7 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
     page,
   }) => {
     await page.goto("/login");
-    await page.locator("#login-email").fill("former@verandapms.test");
+    await page.locator("#login-email").fill("former.group1@verandapms.test");
     await page.locator("#login-password").fill("Former@123");
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page.getByTestId("login-error")).toContainText("deactivated");
@@ -163,17 +167,27 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
   test("T-VH-10 (VH-10): Staff can open /users directly via URL even though sidebar hides it", async ({
     page,
   }) => {
-    await resetSandboxAndSignIn(page, "staff@verandapms.test", "Staff@123");
+    await resetSandboxAndSignIn(
+      page,
+      "staff.group1@verandapms.test",
+      "Staff@123"
+    );
     await expect(page.getByRole("link", { name: "Users" })).toHaveCount(0);
 
     await page.goto("/users");
-    await expect(page.getByTestId("user-row-admin@verandapms.test")).toBeVisible();
+    await expect(
+      page.getByTestId("user-row-admin.group1@verandapms.test")
+    ).toBeVisible();
   });
 
   test("T-VH-11 (VH-11): Staff sees Delete on /rooms/[id] detail page and can delete", async ({
     page,
   }) => {
-    await resetSandboxAndSignIn(page, "staff@verandapms.test", "Staff@123");
+    await resetSandboxAndSignIn(
+      page,
+      "staff.group1@verandapms.test",
+      "Staff@123"
+    );
     await page.goto("/rooms");
     await expect(page.getByTestId("delete-room-SB-1001")).toHaveCount(0);
 
@@ -187,9 +201,13 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
   test("T-VH-12 (VH-12): Admin can deactivate own account in /users and is signed out on reload", async ({
     page,
   }) => {
-    await resetSandboxAndSignIn(page, "admin@verandapms.test", "Admin@123");
+    await resetSandboxAndSignIn(
+      page,
+      "admin.group1@verandapms.test",
+      "Admin@123"
+    );
     await page.goto("/users");
-    const adminRow = page.getByTestId("user-row-admin@verandapms.test");
+    const adminRow = page.getByTestId("user-row-admin.group1@verandapms.test");
     await adminRow.getByRole("button", { name: "Deactivate" }).click();
     await page.reload();
     await expect(page).toHaveURL(/\/login/);
@@ -198,7 +216,11 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
   test("T-VH-13 (VH-13): Tampering role in veranda.v1.session localStorage grants admin UI", async ({
     page,
   }) => {
-    await resetSandboxAndSignIn(page, "staff@verandapms.test", "Staff@123");
+    await resetSandboxAndSignIn(
+      page,
+      "staff.group1@verandapms.test",
+      "Staff@123"
+    );
     await expect(page.getByRole("link", { name: "Users" })).toHaveCount(0);
 
     await page.evaluate(() => {
@@ -227,7 +249,11 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
   test("Multi-group ownership: Group 1 mutation stays isolated from Group 2", async ({
     page,
   }) => {
-    await resetSandboxAndSignIn(page, "group1@verandapms.test", "Group1@123");
+    await resetSandboxAndSignIn(
+      page,
+      "admin.group1@verandapms.test",
+      "Admin@123"
+    );
     await expect(page.getByTestId("workspace-owner-group")).toContainText(
       "Group 1"
     );
@@ -240,8 +266,8 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
     await page.getByRole("button", { name: "Sign out" }).first().click();
     await expect(page).toHaveURL(/\/login/);
 
-    await page.locator("#login-email").fill("group2@verandapms.test");
-    await page.locator("#login-password").fill("Group2@123");
+    await page.locator("#login-email").fill("admin.group2@verandapms.test");
+    await page.locator("#login-password").fill("Admin@123");
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByTestId("workspace-owner-group")).toContainText(
@@ -250,5 +276,16 @@ test.describe("Auth, Session, Access Control & Users (VH-01 to VH-14)", () => {
 
     await page.goto("/rooms");
     await expect(page.getByTestId("room-row-SB-1001")).toBeVisible();
+
+    await page.getByRole("button", { name: "Sign out" }).first().click();
+    await expect(page).toHaveURL(/\/login/);
+
+    await page.locator("#login-email").fill("staff.group2@verandapms.test");
+    await page.locator("#login-password").fill("Staff@123");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page.getByTestId("workspace-owner-group")).toContainText(
+      "Group 2"
+    );
   });
 });

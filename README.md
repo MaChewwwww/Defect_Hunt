@@ -22,20 +22,19 @@ This repository is engineered specifically for the **Polytechnic University of t
 
 ---
 
-## Demo Accounts
+## Group Accounts (Isolated Data per Group)
 
-Displayed on the login screen for contestant and validator convenience:
+Displayed on the login screen for contestant and validator convenience. Each competition group owns an isolated sandbox (`sandbox_id`) with its own Admin, Staff, and Deactivated Staff accounts:
 
-| Role | Email | Password | Display Name & Notes |
-|---|---|---|---|
-| **Admin** | `admin@verandapms.test` | `Admin@123` | **Elena Marasigan** — General Manager (full administrative access) |
-| **Staff** | `staff@verandapms.test` | `Staff@123` | **Marco Villanueva** — Front Desk Concierge (operational access) |
-| **Staff (deactivated)** | `former@verandapms.test` | `Former@123` | **Tricia Soriano** — Former Concierge (`is_active = false`) |
-| **Group 1 — Coral Villa** | `group1@verandapms.test` | `Group1@123` | Isolated data ownership (`00000000-0000-4000-8000-000000000001`) |
-| **Group 2 — Cypress Cove** | `group2@verandapms.test` | `Group2@123` | Isolated data ownership (`00000000-0000-4000-8000-000000000002`) |
-| **Group 3 — Lagoon Sanctuary** | `group3@verandapms.test` | `Group3@123` | Isolated data ownership (`00000000-0000-4000-8000-000000000003`) |
-| **Group 4 — Terracotta Cliff** | `group4@verandapms.test` | `Group4@123` | Isolated data ownership (`00000000-0000-4000-8000-000000000004`) |
-| **Group 5 — Solstice Horizon** | `group5@verandapms.test` | `Group5@123` | Isolated data ownership (`00000000-0000-4000-8000-000000000005`) |
+| Group | Sandbox ID | Admin (`Admin@123`) | Staff (`Staff@123`) | Staff (deactivated, `Former@123`) |
+|---|---|---|---|---|
+| **Group 1 — Coral Villa** | `00000000-0000-4000-8000-000000000001` | `admin.group1@verandapms.test` | `staff.group1@verandapms.test` | `former.group1@verandapms.test` |
+| **Group 2 — Cypress Cove** | `00000000-0000-4000-8000-000000000002` | `admin.group2@verandapms.test` | `staff.group2@verandapms.test` | `former.group2@verandapms.test` |
+| **Group 3 — Lagoon Sanctuary** | `00000000-0000-4000-8000-000000000003` | `admin.group3@verandapms.test` | `staff.group3@verandapms.test` | `former.group3@verandapms.test` |
+| **Group 4 — Terracotta Cliff** | `00000000-0000-4000-8000-000000000004` | `admin.group4@verandapms.test` | `staff.group4@verandapms.test` | `former.group4@verandapms.test` |
+| **Group 5 — Solstice Horizon** | `00000000-0000-4000-8000-000000000005` | `admin.group5@verandapms.test` | `staff.group5@verandapms.test` | `former.group5@verandapms.test` |
+
+Each group sandbox seeds **Elena Marasigan** (`admin`, active), **Marco Villanueva** (`staff`, active), and **Tricia Soriano** (`staff`, `is_active = false`).
 
 ---
 

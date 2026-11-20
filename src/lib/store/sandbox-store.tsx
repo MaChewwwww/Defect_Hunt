@@ -14,6 +14,7 @@ import {
   LOW_ALLOTMENT_THRESHOLD,
 } from "@/lib/domain/calculations";
 import {
+  COMPETITION_GROUPS,
   createInitialSandboxDb,
   resolveGroupByEmail,
 } from "@/lib/domain/seed";
@@ -158,7 +159,7 @@ function readLatestDbFromStorage(fallback: SandboxDatabase | null): SandboxDatab
     }
   }
   if (fallback) return fallback;
-  return createInitialSandboxDb(generateUuid(), new Date());
+  return createInitialSandboxDb(COMPETITION_GROUPS[0].sandboxId, new Date());
 }
 
 export function SandboxProvider({ children }: { children: React.ReactNode }) {
@@ -209,7 +210,7 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
 
     let sandboxId = window.localStorage.getItem(STORAGE_SANDBOX_ID_KEY);
     if (!sandboxId) {
-      sandboxId = generateUuid();
+      sandboxId = COMPETITION_GROUPS[0].sandboxId;
       window.localStorage.setItem(STORAGE_SANDBOX_ID_KEY, sandboxId);
     }
 
@@ -285,7 +286,7 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
     const sandboxId =
       (typeof window !== "undefined" &&
         window.localStorage.getItem(STORAGE_SANDBOX_ID_KEY)) ||
-      generateUuid();
+      COMPETITION_GROUPS[0].sandboxId;
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_SANDBOX_ID_KEY, sandboxId);
     }
@@ -315,64 +316,74 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
     toast.success("Demo data has been restored to original seed values.");
   }, [setTheme]);
 
+  const switchSandboxForGroupEmail = useCallback(
+    (emailToCheck: string, currentDb: SandboxDatabase): SandboxDatabase => {
+      const matchedGroup = resolveGroupByEmail(emailToCheck);
+      if (
+        !matchedGroup ||
+        currentDb.sandboxId === matchedGroup.sandboxId ||
+        typeof window === "undefined"
+      ) {
+        return currentDb;
+      }
+
+      window.localStorage.setItem(
+        getScopedDbStorageKey(currentDb.sandboxId),
+        JSON.stringify(currentDb)
+      );
+
+      let groupDb: SandboxDatabase | null = null;
+      const rawGroupDb = window.localStorage.getItem(
+        getScopedDbStorageKey(matchedGroup.sandboxId)
+      );
+      if (rawGroupDb) {
+        try {
+          groupDb = JSON.parse(rawGroupDb) as SandboxDatabase;
+        } catch {
+          groupDb = null;
+        }
+      }
+
+      if (!groupDb) {
+        groupDb = createInitialSandboxDb(matchedGroup.sandboxId, new Date());
+        void fetch("/api/sandbox/init", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sandboxId: matchedGroup.sandboxId,
+            state: groupDb,
+          }),
+        }).catch(() => {});
+      }
+
+      const serializedGroup = JSON.stringify(groupDb);
+      window.localStorage.setItem(
+        STORAGE_SANDBOX_ID_KEY,
+        matchedGroup.sandboxId
+      );
+      window.localStorage.setItem(STORAGE_DB_KEY, serializedGroup);
+      window.localStorage.setItem(
+        getScopedDbStorageKey(matchedGroup.sandboxId),
+        serializedGroup
+      );
+      setDb(groupDb);
+      return groupDb;
+    },
+    []
+  );
+
   const login = useCallback(
     (
       rawEmail: string,
       password: string,
       rememberMe: boolean
     ): ActionResult<SessionState> => {
-      let latestDb = readLatestDbFromStorage(db);
-
       // Switch data ownership slice when signing into a competition group account
       // without trimming rawEmail so VH-01 whitespace rejection continues to hold.
-      const matchedGroup = resolveGroupByEmail(rawEmail);
-      if (
-        matchedGroup &&
-        latestDb.sandboxId !== matchedGroup.sandboxId &&
-        typeof window !== "undefined"
-      ) {
-        window.localStorage.setItem(
-          getScopedDbStorageKey(latestDb.sandboxId),
-          JSON.stringify(latestDb)
-        );
-
-        let groupDb: SandboxDatabase | null = null;
-        const rawGroupDb = window.localStorage.getItem(
-          getScopedDbStorageKey(matchedGroup.sandboxId)
-        );
-        if (rawGroupDb) {
-          try {
-            groupDb = JSON.parse(rawGroupDb) as SandboxDatabase;
-          } catch {
-            groupDb = null;
-          }
-        }
-
-        if (!groupDb) {
-          groupDb = createInitialSandboxDb(matchedGroup.sandboxId, new Date());
-          void fetch("/api/sandbox/init", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              sandboxId: matchedGroup.sandboxId,
-              state: groupDb,
-            }),
-          }).catch(() => {});
-        }
-
-        const serializedGroup = JSON.stringify(groupDb);
-        window.localStorage.setItem(
-          STORAGE_SANDBOX_ID_KEY,
-          matchedGroup.sandboxId
-        );
-        window.localStorage.setItem(STORAGE_DB_KEY, serializedGroup);
-        window.localStorage.setItem(
-          getScopedDbStorageKey(matchedGroup.sandboxId),
-          serializedGroup
-        );
-        setDb(groupDb);
-        latestDb = groupDb;
-      }
+      const latestDb = switchSandboxForGroupEmail(
+        rawEmail,
+        readLatestDbFromStorage(db)
+      );
 
       // @defect VH-01 (Medium | Auth / Login | Functional)
       // Expected: Leading and trailing spaces in email are trimmed before lookup.
@@ -460,7 +471,7 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
 
       return { ok: true, data: newSession };
     },
-    [db, persistDb]
+    [db, persistDb, switchSandboxForGroupEmail]
   );
 
   const register = useCallback(
@@ -470,9 +481,12 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
       password: string,
       confirmPassword: string
     ): ActionResult<SessionState> => {
-      const latestDb = readLatestDbFromStorage(db);
       const trimmedName = name.trim();
       const trimmedEmail = email.trim();
+      const latestDb = switchSandboxForGroupEmail(
+        trimmedEmail,
+        readLatestDbFromStorage(db)
+      );
 
       if (!trimmedName) {
         return { ok: false, error: "Enter your full name." };
@@ -496,7 +510,7 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
 
       // @defect VH-06 (Medium | Auth / Register | Validation)
       // Expected: Case-insensitive email uniqueness check.
-      // Actual: Case-sensitive comparison allows "Admin@verandapms.test" even though "admin@verandapms.test" exists.
+      // Actual: Case-sensitive comparison allows "Admin.group1@verandapms.test" even though "admin.group1@verandapms.test" exists.
       const duplicate = latestDb.users.some((u) => u.email === trimmedEmail);
       if (duplicate) {
         return {
@@ -542,7 +556,7 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
 
       return { ok: true, data: newSession };
     },
-    [db, persistDb]
+    [db, persistDb, switchSandboxForGroupEmail]
   );
 
   const logout = useCallback(() => {
@@ -555,9 +569,13 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
 
   const requestPasswordReset = useCallback(
     (email: string): ActionResult<{ token: string }> => {
-      const latestDb = readLatestDbFromStorage(db);
+      const trimmedEmail = email.trim();
+      const latestDb = switchSandboxForGroupEmail(
+        trimmedEmail,
+        readLatestDbFromStorage(db)
+      );
       const user = latestDb.users.find(
-        (u) => u.email.toLowerCase() === email.trim().toLowerCase()
+        (u) => u.email.toLowerCase() === trimmedEmail.toLowerCase()
       );
       if (!user) {
         return {
@@ -580,7 +598,7 @@ export function SandboxProvider({ children }: { children: React.ReactNode }) {
       persistDb({ ...latestDb, resetTokens: nextTokens });
       return { ok: true, data: { token } };
     },
-    [db, persistDb]
+    [db, persistDb, switchSandboxForGroupEmail]
   );
 
   const resetPasswordWithToken = useCallback(
